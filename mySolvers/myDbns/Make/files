@@ -1,0 +1,13 @@
+dbnsFlux/dbnsFlux.C
+dbnsFlux/roeFlux/roeFlux.C
+dbnsFlux/rusanovFlux/rusanovFlux.C
+dbnsFlux/betaFlux/betaFlux.C
+dbnsFlux/hllcFlux/hllcFlux.C
+dbnsFlux/AUSMplusUpFlux/AUSMplusUpFlux.C
+dbnsFlux/hllcALEFlux/hllcALEFlux.C
+
+numericFlux/numericFlux.C
+
+bound/boundMinMax.C
+
+LIB = $(FOAM_USER_LIBBIN)/libmyDbns
