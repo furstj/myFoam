@@ -1,0 +1,18 @@
+bocos = finiteVolume/fields/fvPatchFields/derived
+$(bocos)/temperatureDirectedInletOutletVelocity/temperatureDirectedInletOutletVelocityFvPatchVectorField.C
+$(bocos)/totalPressureDirectedInletOutletVelocity/totalPressureDirectedInletOutletVelocityFvPatchVectorField.C
+$(bocos)/uniformOutletInlet/uniformOutletInletFvPatchFields.C
+$(bocos)/inletOutletInternal/inletOutletInternalFvPatchFields.C
+$(bocos)/mixedSubsonicSupersonicOutlet/mixedSubsonicSupersonicOutletFvPatchScalarField.C
+$(bocos)/flowRateDirectedInletVelocity/flowRateDirectedInletVelocityFvPatchVectorField.C
+$(bocos)/movingWallSlipVelocity/movingWallSlipVelocityFvPatchVectorField.C
+$(bocos)/subsonicInletTotal/subsonicInletTotalFvPatchVectorField.C
+$(bocos)/meanTotalPressure/meanTotalPressureFvPatchScalarField.C
+
+limitedGradSchemes = finiteVolume/finiteVolume/gradSchemes/limitedGradSchemes
+$(limitedGradSchemes)/VenkatakrishnanGrad/VenkatakrishnanGrads.C
+
+ddtSchemes = finiteVolume/finiteVolume/ddtSchemes
+
+LIB = $(FOAM_USER_LIBBIN)/libmyFoam
+

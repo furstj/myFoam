@@ -1,0 +1,12 @@
+fvMotionSolvers/displacement/laplacian/myDisplacementLaplacianFvMotionSolver.C
+
+motionInterpolation/motionInterpolation/motionInterpolation.C
+motionInterpolation/patchCorrected/patchCorrectedInterpolation.C
+motionInterpolation/patchTransformed/patchTransformedInterpolation.C
+
+derivedPoint = pointPatchFields/derived
+
+$(derivedPoint)/complexAmplitudeDisplacement/complexAmplitudeDisplacementPointPatchVectorField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libmyFvMotionSolvers
+
