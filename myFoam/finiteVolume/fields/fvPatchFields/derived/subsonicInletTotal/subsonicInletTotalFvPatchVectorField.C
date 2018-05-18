@@ -27,9 +27,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "totalPressureFvPatchScalarField.H"
 #include "totalTemperatureFvPatchScalarField.H"
-#include <stdlib.h>
+#include "psiThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -143,21 +142,23 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
       refCast<const totalTemperatureFvPatchScalarField>
       ( patch().lookupPatchField<volScalarField, scalar>( TName() ) );
 
-    const totalPressureFvPatchScalarField& pp =
-      refCast<const totalPressureFvPatchScalarField>
-      ( patch().lookupPatchField<volScalarField, scalar>( pName() ) );
-							
-
-    const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>("thermo:psi");
+    
+    const fvMesh& mesh = patch().boundaryMesh().mesh();
+    
+    const auto& thermo =
+        mesh.lookupObject<psiThermo>("thermophysicalProperties");
 
     // Need R of the free-stream flow.  Assume R is independent of location
     // along patch so use face 0
-    scalar R = 1.0/(ppsi[0]*pT[0]);
+    label cellI = patch().faceCells()[0];
+    scalar Cp = thermo.Cp()()[cellI];
+    scalar Cv = thermo.Cv()()[cellI];
+    scalar R = Cp - Cv;
+    scalar gamma = Cp / Cv;
 
-    scalar gamma = 
-        static_cast<const totalPressureFvPatchScalarField*>(&pp)->gamma();
-
+    //Info << "R     = " << R << nl;
+    //Info << "gamma = " << gamma << nl;
+    
     const scalarField& pT0 = 
         static_cast<const totalTemperatureFvPatchScalarField*>(&pT)->T0();
 
