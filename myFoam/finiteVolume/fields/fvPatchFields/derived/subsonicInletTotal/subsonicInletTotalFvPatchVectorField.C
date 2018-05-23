@@ -171,7 +171,7 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
     vectorField& Up = *this;
 
     forAll(pSf, faceI) {
-        // Outward normal
+        // Inward normal
         vector n = -pSf[faceI] / mag(pSf[faceI]);
         vector dir = inletDir()[faceI] / mag(inletDir()[faceI]);
 
@@ -198,14 +198,20 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
             scalar b = 2*tmp*Rm;
 
             scalar c = (gamma-1)/2.*tmp*Rm*Rm - gamma*R*T0;
-            //Info << a << "\t" << b << "\t" << c << endl;
-            cb = (-b+sqrt(b*b-4*a*c))/(2*a);
+            //Perr << a << "\t" << b << "\t" << c << "\t" << b*b-4*a*c << endl;
+            cb = (-b+sqrt(max(b*b-4*a*c,0.0)))/(2*a);
         }
         
         scalar ub = 2*cb/(gamma-1) + Rm;
         scalar uMag = ub * oneByCos;
-        Up[faceI] = dir*uMag;
-
+	if (ub>=0)
+	{
+            Up[faceI] = dir*uMag;
+	}
+	else
+	{
+	  Up[faceI] = Uint[faceI];
+        }
    }
     //std::exit(1);
     fixedValueFvPatchVectorField::updateCoeffs();
