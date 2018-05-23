@@ -28,6 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "totalTemperatureFvPatchScalarField.H"
+#include "inletOutletTotalTemperatureFvPatchScalarField.H"
 #include "psiThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -138,9 +139,8 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const totalTemperatureFvPatchScalarField& pT =
-      refCast<const totalTemperatureFvPatchScalarField>
-      ( patch().lookupPatchField<volScalarField, scalar>( TName() ) );
+    const fvPatchScalarField& pT = 
+        patch().lookupPatchField<volScalarField, scalar>(TName());
 
     
     const fvMesh& mesh = patch().boundaryMesh().mesh();
@@ -156,12 +156,22 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
     scalar R = Cp - Cv;
     scalar gamma = Cp / Cv;
 
-    //Info << "R     = " << R << nl;
-    //Info << "gamma = " << gamma << nl;
-    
-    const scalarField& pT0 = 
-        static_cast<const totalTemperatureFvPatchScalarField*>(&pT)->T0();
-
+    scalarField pT0;
+    if (pT.type() == "totalTemperature")
+    {
+        pT0 = refCast<const totalTemperatureFvPatchScalarField>(pT).T0();
+    }
+    else if (pT.type() == "inletOutletTotalTemperature")
+    {
+        pT0 = refCast<const inletOutletTotalTemperatureFvPatchScalarField>(pT).T0();
+    }
+    else
+    {
+        FatalErrorIn("subsonicInletTotalFvPatchVectorField::updateCoeffs()") 
+            << "the subsonicInletTotal has to be combined either with "
+            << "totalTemperature or inletOutletTotalTemperature condition!"
+            << abort(FatalError);
+    }
 
     const Field<vector>& Uint = internalField();
     const Field<scalar>& Tint =

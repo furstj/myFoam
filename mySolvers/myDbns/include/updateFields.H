@@ -8,7 +8,7 @@
     const volScalarField Cp = thermo.Cp();
     const volScalarField Cv = thermo.Cv();
 
-//     h = rhoE/rho - 0.5*magSqr(U) + p/rho;
+    //h = rhoE/rho - 0.5*magSqr(U) + p/rho;
     h = Cp/Cv*(rhoE/rho - 0.5*magSqr(U) );
     h.correctBoundaryConditions();
 
@@ -32,7 +32,7 @@
     thermo.correct();
 
     // Update boundary field of rho
-    //rho.boundaryField() = thermo.rho()().boundaryField();
+    //rho.boundaryFieldRef() = thermo.rho()().boundaryField();
     rho.boundaryFieldRef() = thermo.psi().boundaryField() * p.boundaryField();
 
     // Bound density
