@@ -33,6 +33,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+
 Foam::subsonicInletTotalFvPatchVectorField::
 subsonicInletTotalFvPatchVectorField
 (
@@ -40,11 +41,15 @@ subsonicInletTotalFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(p, iF),
+    mixedFvPatchVectorField(p, iF),
     pName_("p"),
     TName_("T"),
     inletDir_(p.size())
-{}
+{
+    refValue() = *this;
+    refGrad() = Zero;
+    valueFraction() = 0.0;
+}
 
 
 Foam::subsonicInletTotalFvPatchVectorField::
@@ -56,7 +61,7 @@ subsonicInletTotalFvPatchVectorField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchVectorField(ptf, p, iF, mapper),
+    mixedFvPatchVectorField(ptf, p, iF, mapper),
     pName_(ptf.pName_),
     TName_(ptf.TName_),
     inletDir_(ptf.inletDir_, mapper)
@@ -71,11 +76,14 @@ subsonicInletTotalFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF),
+    mixedFvPatchVectorField(p, iF),
     pName_(dict.lookupOrDefault<word>("p", "p")),
     TName_(dict.lookupOrDefault<word>("T", "T")),
     inletDir_("inletDirection", dict, p.size())
 {
+    refValue() = *this;
+    refGrad() = Zero;
+    valueFraction() = 0.0;
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }
 
@@ -85,7 +93,7 @@ subsonicInletTotalFvPatchVectorField
     const subsonicInletTotalFvPatchVectorField& sfspvf
 )
 :
-    fixedValueFvPatchVectorField(sfspvf),
+    mixedFvPatchVectorField(sfspvf),
     pName_(sfspvf.pName_),
     TName_(sfspvf.TName_),
     inletDir_(sfspvf.inletDir_)
@@ -99,7 +107,7 @@ subsonicInletTotalFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(sfspvf, iF),
+    mixedFvPatchVectorField(sfspvf, iF),
     pName_(sfspvf.pName_),
     TName_(sfspvf.TName_),
     inletDir_(sfspvf.inletDir_)
@@ -113,7 +121,7 @@ void Foam::subsonicInletTotalFvPatchVectorField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    fixedValueFvPatchVectorField::autoMap(m);
+    mixedFvPatchVectorField::autoMap(m);
     inletDir_.autoMap(m);
 }
 
@@ -124,7 +132,7 @@ void Foam::subsonicInletTotalFvPatchVectorField::rmap
     const labelList& addr
 )
 {
-    fixedValueFvPatchVectorField::rmap(ptf, addr);
+    mixedFvPatchVectorField::rmap(ptf, addr);
 
     const subsonicInletTotalFvPatchVectorField& tiptf =
         refCast<const subsonicInletTotalFvPatchVectorField>(ptf);
@@ -179,7 +187,8 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
 
     const vectorField& pSf = patch().Sf();
 
-    vectorField& Up = *this;
+    vectorField& refValue = this->refValue();
+    scalarField& valFraction = this->valueFraction();
 
     forAll(pSf, faceI) {
         // Inward normal
@@ -215,17 +224,11 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
         
         scalar ub = 2*cb/(gamma-1) + Rm;
         scalar uMag = ub * oneByCos;
-	if (ub>=0)
-	{
-            Up[faceI] = dir*uMag;
-	}
-	else
-	{
-	  Up[faceI] = Uint[faceI];
-        }
+        refValue[faceI] = dir*uMag;
+        valFraction[faceI] = pos(ub);
    }
     //std::exit(1);
-    fixedValueFvPatchVectorField::updateCoeffs();
+    mixedFvPatchVectorField::updateCoeffs();
 }
 
 
@@ -254,7 +257,6 @@ void Foam::subsonicInletTotalFvPatchVectorField::operator=
 }
 
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -265,5 +267,7 @@ namespace Foam
         subsonicInletTotalFvPatchVectorField
     );
 }
+
+
 
 // ************************************************************************* //

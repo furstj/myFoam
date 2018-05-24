@@ -40,8 +40,8 @@ Description
 #ifndef subsonicInletTotalFvPatchVectorFields_H
 #define subsonicInletTotalFvPatchVectorFields_H
 
-#include "fvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
+#include "fvPatchField.H"
+#include "mixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 
 class subsonicInletTotalFvPatchVectorField
 :
-    public fixedValueFvPatchVectorField
+    public mixedFvPatchVectorField
 {
     // Private data
 
