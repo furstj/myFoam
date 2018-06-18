@@ -5,4 +5,7 @@ wmake libso myDbns
 wmake myLusgsFoam
 wmake myLusgsFoam/myLusgsDyMFoam
 
+wmake mySonicLiquidFoam
+wmake mySonicLiquidFoam/mySonicLiquidDyMFoam
+
 # ----------------------------------------------------------------- end-of-file
