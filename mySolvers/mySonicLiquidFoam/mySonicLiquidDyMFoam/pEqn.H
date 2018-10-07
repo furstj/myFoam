@@ -6,7 +6,7 @@ volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
 surfaceScalarField phid
 (
     "phid",
-    psi
+    fvc::interpolate(psi)
    *(
        fvc::flux(HbyA)
      + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)/fvc::interpolate(rho)
@@ -14,7 +14,7 @@ surfaceScalarField phid
 );
 
 fvc::makeRelative(phid, psi, U);
-//MRF.makeRelative(fvc::interpolate(psi), phid);
+MRF.makeRelative(fvc::interpolate(psi), phid);
 
 
 phi = (rho0/psi)*phid;
@@ -33,6 +33,8 @@ while (pimple.correctNonOrthogonal())
         fvOptions(psiField, p, rho.name())
     );
 
+    pEqn.relax();
+
     pEqn.solve();
 
     if (pimple.finalNonOrthogonalIter())
@@ -44,6 +46,8 @@ while (pimple.correctNonOrthogonal())
 }
 
 #include "compressibleContinuityErrs.H"
+
+p.relax();
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
