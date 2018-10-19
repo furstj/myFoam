@@ -24,7 +24,7 @@
                 if (nei != cellI)  // then data[nei] belongs to upper triangle
                 {
                     scalar dvol = mag( (mesh.C()[own] - mesh.C()[nei]) & Sf[faceI] );
-                    scalar ac = 0.5 * omega * ( 
+                    scalar ac = 0.5 * lusgsOmega * ( 
 			mag( (U[nei] & Sf[faceI]) - meshPhi[faceI]) 
 			+ a[nei] * magSf[faceI] );
                     scalar av = sqr(magSf[faceI]) / dvol * nuMax[nei];

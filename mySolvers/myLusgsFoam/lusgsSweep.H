@@ -4,8 +4,6 @@
       D *= dt * trDeltaTau();
     }
 
-    scalar omega = 1.1;   // Relaxation factor 1<omega<=2
-
     const volScalarField kappa( thermo.Cp() / thermo.Cv() );
     const volScalarField a( sqrt( kappa / thermo.psi() ) );
     const volScalarField nuMax( "nuMax", max(

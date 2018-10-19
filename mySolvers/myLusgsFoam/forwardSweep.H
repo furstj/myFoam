@@ -13,7 +13,7 @@
         forAll(mesh.boundary()[patchi], facei)
         {
             label ci = pFaceCells[facei];
-            scalar ac = 0.5 * omega * ( mag((U[ci] & pSf[facei]) - pMeshPhi[facei])  
+            scalar ac = 0.5 * lusgsOmega * ( mag((U[ci] & pSf[facei]) - pMeshPhi[facei])  
 					+ a[ci]*mag(pSf[facei]));
             D[ci] += ac;
         }
@@ -39,7 +39,7 @@
                 label nei = neighbour[faceI];
 		scalar dvol = mag( (mesh.C()[own] - mesh.C()[nei]) & Sf[faceI] );
 
-                scalar ac = 0.5 * omega * ( 
+                scalar ac = 0.5 * lusgsOmega * ( 
 					   mag( (U[cellI] & Sf[faceI]) -meshPhi[faceI]) 
 					   + a[cellI] * magSf[faceI] );
                 scalar av = sqr(magSf[faceI]) / dvol * nuMax[cellI];
@@ -50,7 +50,7 @@
                 if (own != cellI)  // then data[own] belongs to lower triangle
                 {
                      // Calculate L based on A+
-                    scalar ac = 0.5 * omega * ( 
+                    scalar ac = 0.5 * lusgsOmega * ( 
 			       mag( (U[own] & Sf[faceI]) - meshPhi[faceI]) 
 			       + a[own] * magSf[faceI] );
                     scalar av = sqr(magSf[faceI]) / dvol * nuMax[own];
