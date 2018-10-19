@@ -34,6 +34,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,9 +69,15 @@ int main(int argc, char *argv[])
                 fvm::ddt(rho, U)
               + fvm::div(phi, U)
 	      + turbulence->divDevRhoReff(rho, U)
+	      ==
+	      fvOptions(rho, U)
             );
 
+            fvOptions.constrain(UEqn);
+
             solve(UEqn == -fvc::grad(p));
+
+	    fvOptions.correct(U);
 
             // --- Pressure corrector loop
             while (pimple.correct())
@@ -113,6 +120,7 @@ int main(int argc, char *argv[])
 
                 U -= rAU*fvc::grad(p);
                 U.correctBoundaryConditions();
+		fvOptions.correct(U);
             }
 
 	    phiv==(phi/fvc::interpolate(rho));
