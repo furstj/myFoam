@@ -76,7 +76,7 @@ Foam::myDisplacementLaplacianFvMotionSolver::myDisplacementLaplacianFvMotionSolv
         ),
         cellMotionBoundaryTypes<vector>(pointDisplacement_.boundaryField())
     ),
-    pointLocation_(NULL),
+    pointLocation_(nullptr),
     interpolationPtr_
     (
         coeffDict().found("interpolation")
@@ -90,7 +90,14 @@ Foam::myDisplacementLaplacianFvMotionSolver::myDisplacementLaplacianFvMotionSolv
     frozenPointsZone_
     (
         coeffDict().found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
+      ? fvMesh_.pointZones().findZoneID
+        (
+#if OPENFOAM_PLUS >= 1812
+	   coeffDict().get<word>("frozenPointsZone")
+#else
+	   coeffDict().lookup("frozenPointsZone")
+#endif
+	)
       : -1
     )
 {

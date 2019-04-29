@@ -86,7 +86,11 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 :
     mixedFvPatchField<Type>(p, iF),  // Don't map
     phiName_(ptf.phiName_),
+#if OPENFOAM_PLUS >= 1812
+    uniformOutletValue_(ptf.uniformOutletValue_.clone())
+#else
     uniformOutletValue_(ptf.uniformOutletValue_, false)
+#endif
 {
     this->patchType() = ptf.patchType();
 
@@ -112,7 +116,11 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 :
     mixedFvPatchField<Type>(ptf),
     phiName_(ptf.phiName_),
+#if OPENFOAM_PLUS >= 1812
+    uniformOutletValue_(ptf.uniformOutletValue_.clone())
+#else
     uniformOutletValue_(ptf.uniformOutletValue_, false)
+#endif	
 {}
 
 
@@ -125,7 +133,11 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 :
     mixedFvPatchField<Type>(ptf, iF),
     phiName_(ptf.phiName_),
+#if OPENFOAM_PLUS >= 1812
+    uniformOutletValue_(ptf.uniformOutletValue_.clone())
+#else
     uniformOutletValue_(ptf.uniformOutletValue_, false)
+#endif
 {}
 
 
