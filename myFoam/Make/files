@@ -8,6 +8,7 @@ $(bocos)/flowRateDirectedInletVelocity/flowRateDirectedInletVelocityFvPatchVecto
 $(bocos)/movingWallSlipVelocity/movingWallSlipVelocityFvPatchVectorField.C
 $(bocos)/subsonicInletTotal/subsonicInletTotalFvPatchVectorField.C
 $(bocos)/meanTotalPressure/meanTotalPressureFvPatchScalarField.C
+$(bocos)/mixingPlane/mixingPlaneFvPatchFields.C
 
 limitedGradSchemes = finiteVolume/finiteVolume/gradSchemes/limitedGradSchemes
 $(limitedGradSchemes)/VenkatakrishnanGrad/VenkatakrishnanGrads.C
