@@ -1,3 +1,4 @@
+
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -155,7 +156,7 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
         Type   yi = toXRTheta(sourcePatchField[i], r/mag(r));
         for (label j=0; j<n; j++)
         {
-            for (label k=0; k<j; k++)
+            for (label k=0; k<=j; k++)
             {
                 ATA(j,k) += sqr(w)*pow(xi,j+k);
             }
