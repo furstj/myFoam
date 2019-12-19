@@ -58,7 +58,6 @@
 
     Notes
     - the stator side should use zeroGradient
-    - current version supports only "constant" approximation (i.e. order == 0)
  
     SeeAlso
     Foam::fixedValueFvPatchField

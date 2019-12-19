@@ -142,25 +142,43 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
         f.boundaryField()[sourcePatchID];
 
     // Build a system of normal equations for polynomial approximation
-    // TODO: actuall only 0th order (constant) polynomial
-    Type sum(Zero);
+    label n = this->order_ + 1;
+    scalarSymmetricSquareMatrix ATA(n, scalar(0));
+    List<Type> ATb(n, Type(Zero));
+    
     forAll(sourcePatchField, i)
     {
         vector r = sourcePatch.Cf()[i] - this->origin_;
         r -= (this->axis_ & r)*this->axis_;
-        
-        sum += sourcePatch.magSf()[i]*toXRTheta(sourcePatchField[i], r/mag(r));
+        scalar w = sourcePatch.magSf()[i];
+        scalar xi = mag(r);
+        Type   yi = toXRTheta(sourcePatchField[i], r/mag(r));
+        for (label j=0; j<n; j++)
+        {
+            for (label k=0; k<j; k++)
+            {
+                ATA(j,k) += sqr(w)*pow(xi,j+k);
+            }
+            ATb[j] += sqr(w)*pow(xi,j)*yi;
+        }        
     }
-    reduce(sum, sumOp<Type>());
+    reduce(ATA, sumOp<scalarSymmetricSquareMatrix>());
+    reduce(ATb, sumOp<List<Type>>());
 
-    Type average = sum / gSum(sourcePatch.magSf());
-
+    LUsolve(ATA, ATb);
+    
     Field<Type>& patchField = *this;
     forAll(patchField, i)
     {
         vector r = p.Cf()[i] - this->origin_;
         r -= (this->axis_ & r)*this->axis_;
-        patchField[i] = fromXRTheta(average, r/mag(r));
+        scalar x = mag(r);
+        Type val(Zero);
+        for (label j=0; j<n; j++)
+        {
+            val += ATb[j]*pow(x,j);
+        }
+        patchField[i] = fromXRTheta(val, r/mag(r));
     }
     
     fixedValueFvPatchField<Type>::updateCoeffs();
