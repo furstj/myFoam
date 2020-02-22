@@ -61,7 +61,7 @@ flowRateDirectedInletVelocityFvPatchVectorField
     volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
-    inletDir_(ptf.inletDir_, mapper)
+    inletDir_(mapper(ptf.inletDir_))
 {}
 
 
@@ -214,8 +214,8 @@ void Foam::flowRateDirectedInletVelocityFvPatchVectorField::write(Ostream& os) c
         writeEntryIfDifferent<scalar>(os, "rhoInlet", -VGREAT, rhoInlet_);
         #endif
     } 
-    inletDir_.writeEntry("inletDirection", os);
-    writeEntry("value", os);
+    writeEntry(os, "inletDirection", inletDir_);
+    writeEntry(os, "value", *this);
 }
 
 

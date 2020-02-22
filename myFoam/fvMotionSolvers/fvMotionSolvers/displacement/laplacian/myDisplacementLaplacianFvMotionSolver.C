@@ -52,7 +52,7 @@ namespace Foam
 Foam::myDisplacementLaplacianFvMotionSolver::myDisplacementLaplacianFvMotionSolver
 (
     const polyMesh& mesh,
-    const IOdictionary& dict
+    const dictionary& dict
 )
 :
     displacementMotionSolver(mesh, dict, typeName),

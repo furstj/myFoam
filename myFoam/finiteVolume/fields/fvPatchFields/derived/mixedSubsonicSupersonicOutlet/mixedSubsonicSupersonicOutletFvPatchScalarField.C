@@ -71,7 +71,7 @@ mixedSubsonicSupersonicOutletFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     TName_(ptf.TName_),
-    fixedValue_(ptf.fixedValue_, mapper),
+    fixedValue_(mapper(ptf.fixedValue_)),
     UName_(ptf.UName_)
 {}
 
@@ -133,7 +133,7 @@ void mixedSubsonicSupersonicOutletFvPatchScalarField::autoMap
 {
     mixedFvPatchScalarField::autoMap(m);
 
-    fixedValue_.autoMap(m);
+    m(fixedValue_, fixedValue_);
 }
 
 
@@ -203,9 +203,9 @@ mixedSubsonicSupersonicOutletFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
-    fixedValue_.writeEntry("fixedValue", os);
+    writeEntry(os, "fixedValue", fixedValue_);
     os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
+    writeEntry(os, "value", *this);
 }
 
 

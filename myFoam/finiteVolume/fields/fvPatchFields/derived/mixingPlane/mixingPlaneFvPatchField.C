@@ -194,7 +194,7 @@ void Foam::mixingPlaneFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
     os.writeKeyword("order") << order_ << token::END_STATEMENT << nl;
     os.writeKeyword("source") << source_ << token::END_STATEMENT << nl;
-    this->writeEntry("value", os);
+    writeEntry(os, "value", *this);
 }
 
 

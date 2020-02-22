@@ -151,8 +151,8 @@ void Foam::inletOutletInternalFvPatchField<Type>::write(Ostream& os) const
     {
         os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     }
-    this->refValue().writeEntry("inletValue", os);
-    this->writeEntry("value", os);
+    writeEntry(os, "inletValue", this->refValue());
+    writeEntry(os, "value", *this);
 }
 
 

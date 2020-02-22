@@ -133,7 +133,7 @@ void Foam::movingWallSlipVelocityFvPatchVectorField::updateCoeffs()
 void Foam::movingWallSlipVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    writeEntry(os, "value", *this);
 }
 
 

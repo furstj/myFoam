@@ -64,8 +64,8 @@ totalPressureDirectedInletOutletVelocityFvPatchVectorField
     psiName_(ptf.psiName_),
     phiName_(ptf.phiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, mapper),
-    inletDir_(ptf.inletDir_, mapper)
+    p0_(mapper(ptf.p0_)),
+    inletDir_(mapper(ptf.inletDir_))
 {}
 
 
@@ -129,8 +129,8 @@ void Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
-    p0_.autoMap(m);
-    inletDir_.autoMap(m);
+    m(p0_, p0_);
+    m(inletDir_, inletDir_);
 }
 
 
@@ -197,9 +197,9 @@ void Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::write(Ost
     #endif
 
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
-    p0_.writeEntry("p0", os);
-    inletDir_.writeEntry("inletDirection", os);
-    writeEntry("value", os);
+    writeEntry(os, "p0", p0_);
+    writeEntry(os, "inletDirection", inletDir_);
+    writeEntry(os, "value", *this);
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

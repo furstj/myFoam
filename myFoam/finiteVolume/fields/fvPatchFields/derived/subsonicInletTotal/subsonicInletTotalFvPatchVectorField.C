@@ -64,7 +64,7 @@ subsonicInletTotalFvPatchVectorField
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     pName_(ptf.pName_),
     TName_(ptf.TName_),
-    inletDir_(ptf.inletDir_, mapper)
+    inletDir_(mapper(ptf.inletDir_))
 {}
 
 
@@ -122,7 +122,7 @@ void Foam::subsonicInletTotalFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
-    inletDir_.autoMap(m);
+    m(inletDir_, inletDir_);
 }
 
 
@@ -242,8 +242,8 @@ void Foam::subsonicInletTotalFvPatchVectorField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "p", "p", pName_);
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
     #endif
-    inletDir_.writeEntry("inletDirection", os);
-    writeEntry("value", os);
+    writeEntry(os, "inletDirection", inletDir_);
+    writeEntry(os, "value", *this);
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

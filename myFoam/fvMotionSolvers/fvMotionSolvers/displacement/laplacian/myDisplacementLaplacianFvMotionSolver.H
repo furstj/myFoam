@@ -82,12 +82,6 @@ class myDisplacementLaplacianFvMotionSolver
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        myDisplacementLaplacianFvMotionSolver
-        (
-            const myDisplacementLaplacianFvMotionSolver&
-        );
-
         //- Disallow default bitwise assignment
         void operator=(const myDisplacementLaplacianFvMotionSolver&);
 
@@ -104,8 +98,15 @@ public:
         myDisplacementLaplacianFvMotionSolver
         (
             const polyMesh&,
-            const IOdictionary&
+            const dictionary&
         );
+
+        //- Disallow default bitwise copy construct
+        myDisplacementLaplacianFvMotionSolver
+        (
+            const myDisplacementLaplacianFvMotionSolver&
+        );
+
 
 
     //- Destructor

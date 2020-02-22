@@ -86,8 +86,8 @@ complexAmplitudeDisplacementPointPatchVectorField
     frequency_(ptf.frequency_),
     phase_(ptf.phase_),
     ramp_(ptf.ramp_),
-    realAmplitude_(ptf.realAmplitude_, mapper),
-    imagAmplitude_(ptf.imagAmplitude_, mapper)
+    realAmplitude_(mapper(ptf.realAmplitude_)),
+    imagAmplitude_(mapper(ptf.imagAmplitude_))
 {}
 
 
@@ -115,8 +115,8 @@ void complexAmplitudeDisplacementPointPatchVectorField::autoMap
 )
 {
     fixedValuePointPatchField<vector>::autoMap(m);
-    realAmplitude_.autoMap(m);
-    imagAmplitude_.autoMap(m);
+    m(realAmplitude_, realAmplitude_);
+    m(imagAmplitude_, imagAmplitude_);
 }
 
 
@@ -161,9 +161,9 @@ void complexAmplitudeDisplacementPointPatchVectorField::write(Ostream& os) const
     os.writeKeyword("frequency") << frequency_ << token::END_STATEMENT << nl;
     os.writeKeyword("phase") << phase_ << token::END_STATEMENT << nl;
     os.writeKeyword("ramp") << ramp_ << token::END_STATEMENT << nl;
-    writeEntry("realAmplitude", os);
-    writeEntry("imagAmplitude", os);
-    writeEntry("value", os);
+    writeEntry(os, "realAmplitude", realAmplitude_);
+    writeEntry(os, "imagAmplitude", imagAmplitude_);
+    writeEntry(os, "value", *this);
 }
 
 

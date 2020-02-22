@@ -93,7 +93,7 @@ Foam::meanTotalPressureFvPatchScalarField::meanTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, mapper),
+    p0_(mapper(ptf.p0_)),
     meanValue_(ptf.meanValue_)
 {}
 
@@ -139,7 +139,7 @@ void Foam::meanTotalPressureFvPatchScalarField::autoMap
 )
 {
     fixedValueFvPatchScalarField::autoMap(m);
-    p0_.autoMap(m);
+    m(p0_, p0_);
 }
 
 
@@ -281,9 +281,9 @@ void Foam::meanTotalPressureFvPatchScalarField::write(Ostream& os) const
     os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
-    p0_.writeEntry("p0", os);
+    writeEntry(os, "p0", p0_);
     os.writeKeyword("meanValue") << meanValue_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
+    writeEntry(os, "value", *this);
 }
 
 

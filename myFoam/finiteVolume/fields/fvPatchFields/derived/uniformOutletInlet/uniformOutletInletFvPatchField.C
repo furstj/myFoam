@@ -104,7 +104,7 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
     // Initialize the patch value to the refValue
     fvPatchField<Type>::operator=(this->refValue());
 
-    this->map(ptf, mapper);
+    mapper(*this, ptf);
 }
 
 
@@ -175,7 +175,7 @@ void Foam::uniformOutletInletFvPatchField<Type>::write(Ostream& os) const
         os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     }
     this->uniformOutletValue_->writeData(os);
-    this->writeEntry("value", os);
+    writeEntry(os, "value", *this);
 }
 
 

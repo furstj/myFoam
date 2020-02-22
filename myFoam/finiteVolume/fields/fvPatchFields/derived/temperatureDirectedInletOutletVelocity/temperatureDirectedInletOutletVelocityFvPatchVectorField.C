@@ -74,8 +74,8 @@ temperatureDirectedInletOutletVelocityFvPatchVectorField
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     TName_(ptf.TName_),
-    T0_(ptf.T0_, mapper),
-    inletDir_(ptf.inletDir_, mapper),
+    T0_(mapper(ptf.T0_)),
+    inletDir_(mapper(ptf.inletDir_)),
     cylindricalCCS_(ptf.cylindricalCCS_),
     omega_(ptf.omega_)
 {}
@@ -152,7 +152,7 @@ void temperatureDirectedInletOutletVelocityFvPatchVectorField::autoMap
 {
     mixedFvPatchVectorField::autoMap(m);
 
-    inletDir_.autoMap(m);
+    m(inletDir_, inletDir_);
 }
 
 
@@ -265,9 +265,9 @@ temperatureDirectedInletOutletVelocityFvPatchVectorField::write(Ostream& os) con
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
     os.writeKeyword("cylindricalCCS") << cylindricalCCS_ << token::END_STATEMENT << nl;
     os.writeKeyword("omega")<< omega_ << token::END_STATEMENT << nl;
-    T0_.writeEntry("T0", os);
-    inletDir_.writeEntry("inletDirection", os);
-    writeEntry("value", os);
+    writeEntry(os, "T0", T0_);
+    writeEntry(os, "inletDirection", inletDir_);
+    writeEntry(os, "value", *this);
 }
 
 
