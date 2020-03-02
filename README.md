@@ -1,5 +1,5 @@
 
-** myFoam ** 
+# myFoam 
 
 The repository contains several additional solvers for OpenFOAM.
 
