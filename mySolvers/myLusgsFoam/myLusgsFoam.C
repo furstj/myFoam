@@ -41,6 +41,7 @@ Author
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "psiThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "bound.H"
@@ -54,17 +55,23 @@ Author
 
 int main(int argc, char *argv[])
 {
-#   include "postProcess.H"
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "createTimeControls.H"
-#   include "readLUSGSControls.H"
-#   include "createRDeltaTau.H"
+    #include "postProcess.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createDynamicFvMesh.H"
+    #include "createFields.H"
+    #include "createTimeControls.H"
+    #include "readLUSGSControls.H"
+    #include "createRDeltaTau.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    turbulence->validate();
+    // Patch for correct calculation of meshPhi (U needs old values)
+    {
+        auto dummy = fvc::ddt(U);
+    } 
+  
     Info<< "\nStarting time loop\n" << endl;
 
     scalar CoNum = 0.0;
@@ -72,25 +79,27 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readFieldBounds.H"
+        #include "readTimeControls.H"
+        #include "readFieldBounds.H"
 
         surfaceScalarField amaxSf("amaxSf", 
         mag(fvc::interpolate(U) & mesh.Sf()) +
         mesh.magSf() * fvc::interpolate(sqrt(thermo.Cp()/thermo.Cv()/thermo.psi())));
         
 
-#       include "compressibleCFLNo.H"
-#       include "setDeltaT.H"
+        #include "compressibleCFLNo.H"
+        #include "setDeltaT.H"
         if (LTS)
         {
-#           include "setRDeltaTau.H"
+            #include "setRDeltaTau.H"
         }
 
         runTime++;
         
         Info<< "\n Time = " << runTime.value() << nl;
 
+        mesh.update();
+        
         scalar initialRezRho=0, initialRezRhoU=0, initialRezRhoE=0;
 
         for (int intIter=0; intIter<lusgsIntIters; intIter++)
