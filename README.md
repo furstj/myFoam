@@ -8,8 +8,43 @@ several branches supporting different versions of OpenFOAM:
 - **OF5** branch for OpenFOAM 5
 
 
-## myLusgsFoam
-The LU-SGS solver for steady or transient simulations of turbulent compressible flows.
+The package consists of two sub-directories:
 
-## mySonicLiquidFoam
-Transient solver for trans-sonic/supersonic, laminar flow of a compressible liquid.
+- **myFoam** containing several extensions to standard OpenFOAM including:
+  - some specific boundary conditions,
+  - mesh movement solver,
+  - Venkatakrisnan limiter.
+- **Solver** containing
+  - *myLusgsFoam*: the LU-SGS solver for steady or transient simulations
+    of turbulent compressible flows, 
+  - *mySonicLiquidFoam*: transient solver for trans-sonic/supersonic, laminar
+    flow of a compressible liquid. 
+
+# Installation
+The installation is quite easy, just do
+
+    cd myFoam
+    ./Allwmake
+	cd ../mySolvers
+	./Allwmake
+
+# Tutorial case
+There is simple tutorial case in *tutorials/myLuSgsFoam*. Just run `./Allrun`
+inside that directory.
+
+# How to cite
+Please cite as
+
+    @article{Furst2018,
+    author = {F{\"{u}}rst, Ji\v{r}{\'{\i}}},
+    doi = {10.1016/j.compfluid.2018.04.020},
+    issn = {00457930},
+    journal = {Computers {\&} Fluids},
+    month = {aug},
+    pages = {332--339},
+    title = {Development of a coupled matrix-free {LU-SGS} solver for turbulent compressible flows},
+    volume = {172},
+    year = {2018}
+	}
+
+	
