@@ -49,7 +49,7 @@ Usage
     \verbatim
     <patchName>
     {
-        type            fixedMean;
+        type            blendedMean;
         meanValue       1.0;
 	blendFactor     0.05;
     }
