@@ -9,6 +9,9 @@ $(bocos)/movingWallSlipVelocity/movingWallSlipVelocityFvPatchVectorField.C
 $(bocos)/subsonicInletTotal/subsonicInletTotalFvPatchVectorField.C
 $(bocos)/meanTotalPressure/meanTotalPressureFvPatchScalarField.C
 $(bocos)/mixingPlane/mixingPlaneFvPatchFields.C
+$(bocos)/subsonicOutletVelocity/subsonicOutletVelocityFvPatchVectorField.C
+$(bocos)/subsonicOutletTemperature/subsonicOutletTemperatureFvPatchScalarField.C
+$(bocos)/blendedMean/blendedMeanFvPatchFields.C
 
 limitedGradSchemes = finiteVolume/finiteVolume/gradSchemes/limitedGradSchemes
 $(limitedGradSchemes)/VenkatakrishnanGrad/VenkatakrishnanGrads.C
