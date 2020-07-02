@@ -73,7 +73,8 @@ public:
     //- Return a reference to the selected dbnsFlux
     static autoPtr<dbnsFlux> New(
         const fvMesh& mesh, 
-        const dictionary& dict
+        const dictionary& dict,
+	const word key="dbnsFlux"
     );
 
     // Destructor - default

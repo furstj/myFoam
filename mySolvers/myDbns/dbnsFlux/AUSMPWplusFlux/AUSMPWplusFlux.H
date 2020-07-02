@@ -22,29 +22,29 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    hllcALEFlux
+    ausmPWPlusFlux
 
 Description
-    HLLC Arbitrary Lagrangian-Eulerian (ALE) flux class, computes numerical
-    fluxes based on HLLC ALE scheme. Uses primitive variables as input and
-    gives back conservative numerical fluxes.
+    AUSMPW+ flux class, computes numerical fluxes based on AUSMPW+ scheme. Uses primitive 
+    variables as input and gives back conservative numerical fluxes.
 
-    Luo, H.; Baum, Joseph D. and Lohner R. "On the computation of multi-
-    material flows using ALE formulation."
-    Journal of Computational Physics 194 (2004): 304–328.
+    KIM, Kyu Hong, KIM, Chongam and RHO, Oh Hyun. 
+    Methods for the accurate computations of hypersonic flows. I. AUSMPW+ scheme. 
+    Journal of Computational Physics. 2001. DOI 10.1006/jcph.2001.6873. 
 
 Author
-    Oliver Borm  All rights reserved.
+    Jiri Furstr  All rights reserved.
+
 
 SourceFiles
-    hllcALEFlux.H
+    AUSMPWplusFlux.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hllcALEFlux_H
-#define hllcALEFlux_H
+#ifndef AUSMPWplusFlux_H
+#define AUSMPWplusFlux_H
 
-#include "fvCFD.H"
+#include "dbnsFlux.H" 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,46 +52,54 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class hllcALEFlux Declaration
+                           Class AUSMPWplusFlux Declaration
 \*---------------------------------------------------------------------------*/
 
-class hllcALEFlux
+class AUSMPWplusFlux: public dbnsFlux
 {
-
+private:
+    AUSMPWplusFlux();
+    AUSMPWplusFlux(const AUSMPWplusFlux&);
+  
 public:
+    TypeName("AUSMPWplusFlux");
 
     // Constructors
 
-        //- Constructor null
-        hllcALEFlux()
-        {}
+    //- Constructor 
+    AUSMPWplusFlux(const fvMesh&, const dictionary&);
 
 
     // Destructor - default
-
+    virtual ~AUSMPWplusFlux() {};
 
     // Member Functions
+    
+    //- Update fluxes based on current left and right states
+    virtual void evaluateFlux
+    (
+        scalar& rhoFlux,
+        vector& rhoUFlux,
+        scalar& rhoEFlux,
+        const scalar& pLeft,
+        const scalar& pRight,
+        const vector& ULeft,
+        const vector& URight,
+        const scalar& TLeft,
+        const scalar& TRight,
+        const scalar& RLeft,
+        const scalar& RRight,
+        const scalar& CvLeft,
+        const scalar& CvRight,
+        const vector& Sf,
+        const scalar& magSf,
+	const scalar& meshPhi
+    ) const;
 
-        //- Update fluxes based on current left and right states
-        void evaluateFlux
-        (
-            scalar& rhoFlux,
-            vector& rhoUFlux,
-            scalar& rhoEFlux,
-            const scalar& pLeft,
-            const scalar& pRight,
-            const vector& ULeft,
-            const vector& URight,
-            const scalar& TLeft,
-            const scalar& TRight,
-            const scalar& RLeft,
-            const scalar& RRight,
-            const scalar& CvLeft,
-            const scalar& CvRight,
-            const vector& Sf,
-            const scalar& magSf,
-            const vector& dotX
-        ) const;
+private:
+  
+    scalar alpha_;
+    scalar beta_;
 };
 
 

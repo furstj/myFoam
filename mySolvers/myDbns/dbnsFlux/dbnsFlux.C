@@ -51,10 +51,11 @@ namespace Foam
 Foam::autoPtr<Foam::dbnsFlux> Foam::dbnsFlux::New
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word key
 )
 {
-    const word fluxName( dict.lookup("dbnsFlux") );
+    const word fluxName( dict.lookup(key) );
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(fluxName);
@@ -63,7 +64,7 @@ Foam::autoPtr<Foam::dbnsFlux> Foam::dbnsFlux::New
     {
         FatalErrorIn
         (
-            "dbnsFlux::New(const word&)"
+            "dbnsFlux::New(mesh, dict, key)"
         )   << "Unknown dbnsFlux type "
             << fluxName << nl << nl
             << "Valid dbnsFlux types are :" << endl
