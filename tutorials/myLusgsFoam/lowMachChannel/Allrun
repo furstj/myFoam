@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Run from this directory
+cd ${0%/*} || exit 1     
+
+# Source tutorial run functions                   
+. $WM_PROJECT_DIR/bin/tools/RunFunctions	
+		
+# Create mesh					
+blockMesh					
+
+# Run in serial
+`getApplication` | tee log.solver 			
+
+# Run in parallel (4 cores)
+# decomposePar
+# mpirun -n `getNumberOfProcessors` `getApplication` -parallel | tee log.solver			
+# reconstructPar
+
+#------------------------------------------------------------------------------
