@@ -133,7 +133,11 @@ void Foam::movingWallSlipVelocityFvPatchVectorField::updateCoeffs()
 void Foam::movingWallSlipVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+#if (OPENFOAM >= 1912)
+    this->writeEntry("value", os);
+#else
     writeEntry(os, "value", *this);
+#endif
 }
 
 

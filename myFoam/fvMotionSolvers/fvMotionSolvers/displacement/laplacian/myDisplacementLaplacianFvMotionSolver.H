@@ -98,9 +98,13 @@ public:
         myDisplacementLaplacianFvMotionSolver
         (
             const polyMesh&,
+#if (OPENFOAM >= 1912)    
+            const IOdictionary&
+#else
             const dictionary&
+#endif
         );
-
+    
         //- Disallow default bitwise copy construct
         myDisplacementLaplacianFvMotionSolver
         (

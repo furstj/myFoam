@@ -206,16 +206,21 @@ void Foam::flowRateDirectedInletVelocityFvPatchVectorField::write(Ostream& os) c
     flowRate_->writeData(os);
     if (!volumetric_)
     {
-        #if OPENFOAM_PLUS>=1712
+        #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1912)
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntryIfDifferent<scalar>("rhoInlet", -VGREAT, rhoInlet_);
         #else
         writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
         writeEntryIfDifferent<scalar>(os, "rhoInlet", -VGREAT, rhoInlet_);
         #endif
-    } 
+    }
+#if (OPENFOAM >= 1912)
+    inletDir_.writeEntry("inletDirection", os);
+    this->writeEntry("value", os);
+#else
     writeEntry(os, "inletDirection", inletDir_);
     writeEntry(os, "value", *this);
+#endif
 }
 
 

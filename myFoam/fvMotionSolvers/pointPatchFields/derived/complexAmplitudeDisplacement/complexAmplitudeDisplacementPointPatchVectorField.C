@@ -115,8 +115,13 @@ void complexAmplitudeDisplacementPointPatchVectorField::autoMap
 )
 {
     fixedValuePointPatchField<vector>::autoMap(m);
+#if (OPENFOAM >= 1912)
+    realAmplitude_.autoMap(m);
+    imagAmplitude_.autoMap(m);
+#else
     m(realAmplitude_, realAmplitude_);
     m(imagAmplitude_, imagAmplitude_);
+#endif
 }
 
 
@@ -161,9 +166,15 @@ void complexAmplitudeDisplacementPointPatchVectorField::write(Ostream& os) const
     os.writeKeyword("frequency") << frequency_ << token::END_STATEMENT << nl;
     os.writeKeyword("phase") << phase_ << token::END_STATEMENT << nl;
     os.writeKeyword("ramp") << ramp_ << token::END_STATEMENT << nl;
+    #if (OPENFOAM >= 1912)
+    realAmplitude_.writeEntry("realAmplitude", os);
+    imagAmplitude_.writeEntry("imagAmplitude", os);
+    this->writeEntry("value", os);
+    #else
     writeEntry(os, "realAmplitude", realAmplitude_);
     writeEntry(os, "imagAmplitude", imagAmplitude_);
     writeEntry(os, "value", *this);
+    #endif
 }
 
 

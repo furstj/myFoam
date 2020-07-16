@@ -86,7 +86,7 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 :
     mixedFvPatchField<Type>(p, iF),  // Don't map
     phiName_(ptf.phiName_),
-#if OPENFOAM_PLUS >= 1812
+#if (OPENFOAM_PLUS >= 1812 || OPENFOAM >= 1912)
     uniformOutletValue_(ptf.uniformOutletValue_.clone())
 #else
     uniformOutletValue_(ptf.uniformOutletValue_, false)
@@ -103,8 +103,11 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 
     // Initialize the patch value to the refValue
     fvPatchField<Type>::operator=(this->refValue());
-
+#if (OPENFOAM >= 1912)
+    this->map(ptf, mapper);
+#else
     mapper(*this, ptf);
+#endif
 }
 
 
@@ -116,7 +119,7 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 :
     mixedFvPatchField<Type>(ptf),
     phiName_(ptf.phiName_),
-#if OPENFOAM_PLUS >= 1812
+#if (OPENFOAM_PLUS >= 1812 || OPENFOAM >= 1912)
     uniformOutletValue_(ptf.uniformOutletValue_.clone())
 #else
     uniformOutletValue_(ptf.uniformOutletValue_, false)
@@ -133,7 +136,7 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
 :
     mixedFvPatchField<Type>(ptf, iF),
     phiName_(ptf.phiName_),
-#if OPENFOAM_PLUS >= 1812
+#if (OPENFOAM_PLUS >= 1812 || OPENFOAM >= 1912)
     uniformOutletValue_(ptf.uniformOutletValue_.clone())
 #else
     uniformOutletValue_(ptf.uniformOutletValue_, false)
@@ -175,7 +178,11 @@ void Foam::uniformOutletInletFvPatchField<Type>::write(Ostream& os) const
         os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     }
     this->uniformOutletValue_->writeData(os);
+#if (OPENFOAM >= 1912)
+    this->writeEntry("value", os);
+#else
     writeEntry(os, "value", *this);
+#endif
 }
 
 

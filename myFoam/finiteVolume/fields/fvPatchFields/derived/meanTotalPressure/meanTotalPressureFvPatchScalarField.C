@@ -139,7 +139,11 @@ void Foam::meanTotalPressureFvPatchScalarField::autoMap
 )
 {
     fixedValueFvPatchScalarField::autoMap(m);
+#if (OPENFOAM >= 1912)
+    p0_.autoMap(m);
+#else
     m(p0_, p0_);
+#endif    
 }
 
 
@@ -271,7 +275,7 @@ void Foam::meanTotalPressureFvPatchScalarField::updateCoeffs()
 void Foam::meanTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    #if OPENFOAM_PLUS>=1712
+    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1912)
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     #else
@@ -281,9 +285,14 @@ void Foam::meanTotalPressureFvPatchScalarField::write(Ostream& os) const
     os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
-    writeEntry(os, "p0", p0_);
     os.writeKeyword("meanValue") << meanValue_ << token::END_STATEMENT << nl;
+#if (OPENFOAM >= 1912)
+    p0_.writeEntry("p0", os);
+    this->writeEntry("value", os);
+#else
+    writeEntry(os, "p0", p0_);
     writeEntry(os, "value", *this);
+#endif
 }
 
 

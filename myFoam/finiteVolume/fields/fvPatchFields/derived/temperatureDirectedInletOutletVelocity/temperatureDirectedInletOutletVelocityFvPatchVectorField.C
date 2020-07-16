@@ -151,8 +151,11 @@ void temperatureDirectedInletOutletVelocityFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
-
+#if (OPENFOAM >= 1912)
+    inletDir_.autoMap(m);
+#else
     m(inletDir_, inletDir_);
+#endif
 }
 
 
@@ -265,9 +268,15 @@ temperatureDirectedInletOutletVelocityFvPatchVectorField::write(Ostream& os) con
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
     os.writeKeyword("cylindricalCCS") << cylindricalCCS_ << token::END_STATEMENT << nl;
     os.writeKeyword("omega")<< omega_ << token::END_STATEMENT << nl;
+#if (OPENFOAM >= 1912)
+    T0_.writeEntry("T0", os);
+    inletDir_.writeEntry("inletDirection", os);
+    writeEntry("value", os);
+#else
     writeEntry(os, "T0", T0_);
     writeEntry(os, "inletDirection", inletDir_);
     writeEntry(os, "value", *this);
+#endif
 }
 
 

@@ -65,8 +65,13 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+#if (OPENFOAM >= 1912)
+    meanValue_(ptf.meanValue_.clone()),
+    blendFactor_(ptf.blendFactor_.clone())
+#else
     meanValue_(ptf.meanValue_, false),
     blendFactor_(ptf.blendFactor_, false)
+#endif
 {}
 
 
@@ -77,8 +82,13 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
+#if (OPENFOAM >= 1912)
+    meanValue_(ptf.meanValue_.clone()),
+    blendFactor_(ptf.blendFactor_.clone())
+#else
     meanValue_(ptf.meanValue_, false),
     blendFactor_(ptf.blendFactor_, false)
+#endif
 {}
 
 
@@ -90,8 +100,13 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
+#if (OPENFOAM >= 1912)
+    meanValue_(ptf.meanValue_.clone()),
+    blendFactor_(ptf.blendFactor_.clone())
+#else
     meanValue_(ptf.meanValue_, false),
     blendFactor_(ptf.blendFactor_, false)
+#endif
 {}
 
 
@@ -115,7 +130,7 @@ void Foam::blendedMeanFvPatchField<Type>::updateCoeffs()
         gSum(this->patch().magSf()*newValues)
        /gSum(this->patch().magSf());
 
-    if (mag(meanValue) > small && mag(meanValuePsi)/mag(meanValue) > 0.5)
+    if (mag(meanValue) > SMALL && mag(meanValuePsi)/mag(meanValue) > 0.5)
     {
         newValues *= mag(meanValue)/mag(meanValuePsi);
     }
@@ -134,9 +149,15 @@ template<class Type>
 void Foam::blendedMeanFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
+    #if (OPENFOAM >= 1912)
+    fvPatchField<Type>::write(os);
+    meanValue_->writeData(os);
+    blendFactor_->writeData(os);
+    #else 
     writeEntry(os, meanValue_());
     writeEntry(os, blendFactor_());
     writeEntry(os, "value", *this);
+    #endif
 }
 
 

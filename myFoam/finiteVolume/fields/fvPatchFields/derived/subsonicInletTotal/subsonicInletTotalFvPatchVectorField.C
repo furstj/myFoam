@@ -122,7 +122,11 @@ void Foam::subsonicInletTotalFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
+#if (OPENFOAM >= 1912)
+    inletDir_.autoMap(m);
+#else
     m(inletDir_, inletDir_);
+#endif    
 }
 
 
@@ -235,15 +239,20 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
 void Foam::subsonicInletTotalFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    #if OPENFOAM_PLUS>=1712
+    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1912)
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     #else
     writeEntryIfDifferent<word>(os, "p", "p", pName_);
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
     #endif
+#if (OPENFOAM >= 1912)
+    inletDir_.writeEntry("inletDirection", os);
+    this->writeEntry("value", os);
+#else
     writeEntry(os, "inletDirection", inletDir_);
     writeEntry(os, "value", *this);
+#endif    
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

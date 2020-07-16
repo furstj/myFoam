@@ -52,7 +52,11 @@ namespace Foam
 Foam::myDisplacementLaplacianFvMotionSolver::myDisplacementLaplacianFvMotionSolver
 (
     const polyMesh& mesh,
+#if (OPENFOAM >= 1912)    
+    const IOdictionary& dict
+#else
     const dictionary& dict
+#endif
 )
 :
     displacementMotionSolver(mesh, dict, typeName),
@@ -92,7 +96,7 @@ Foam::myDisplacementLaplacianFvMotionSolver::myDisplacementLaplacianFvMotionSolv
         coeffDict().found("frozenPointsZone")
       ? fvMesh_.pointZones().findZoneID
         (
-#if OPENFOAM_PLUS >= 1812
+#if (OPENFOAM_PLUS >= 1812 || OPENFOAM >= 1912)
 	   coeffDict().get<word>("frozenPointsZone")
 #else
 	   coeffDict().lookup("frozenPointsZone")
