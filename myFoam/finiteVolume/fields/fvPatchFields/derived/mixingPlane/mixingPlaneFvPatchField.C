@@ -163,7 +163,7 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
             ATb[j] += sqr(w)*pow(xi,j)*yi;
         }        
     }
-#if (OPENFOAM == 1912)
+#if (OPENFOAM >= 1912)
     for (label i=0; i<n; i++)
         for (label j=0; j<n; j++)
             reduce(ATA(i,j), sumOp<scalar>());
