@@ -129,7 +129,7 @@ void Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     p0_.autoMap(m);
     inletDir_.autoMap(m);
 #else
@@ -193,7 +193,7 @@ void Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::updateCoe
 void Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1912)
+    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1812)
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     #else
@@ -202,7 +202,7 @@ void Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::write(Ost
     #endif
 
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     p0_.writeEntry("p0", os);
     inletDir_.writeEntry("inletDirection", os);
     this->writeEntry("value", os);

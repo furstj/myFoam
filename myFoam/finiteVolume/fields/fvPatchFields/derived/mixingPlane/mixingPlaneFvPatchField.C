@@ -163,7 +163,7 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
             ATb[j] += sqr(w)*pow(xi,j)*yi;
         }        
     }
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     for (label i=0; i<n; i++)
         for (label j=0; j<n; j++)
             reduce(ATA(i,j), sumOp<scalar>());
@@ -200,7 +200,7 @@ void Foam::mixingPlaneFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
     os.writeKeyword("order") << order_ << token::END_STATEMENT << nl;
     os.writeKeyword("source") << source_ << token::END_STATEMENT << nl;
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     this->writeEntry("value", os);
 #else
     writeEntry(os, "value", *this);

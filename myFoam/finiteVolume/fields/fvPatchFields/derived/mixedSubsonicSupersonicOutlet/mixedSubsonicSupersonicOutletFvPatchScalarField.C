@@ -133,7 +133,7 @@ void mixedSubsonicSupersonicOutletFvPatchScalarField::autoMap
 {
     mixedFvPatchScalarField::autoMap(m);
 
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     fixedValue_.autoMap(m);
 #else
     m(fixedValue_, fixedValue_);
@@ -208,7 +208,7 @@ mixedSubsonicSupersonicOutletFvPatchScalarField::write(Ostream& os) const
     fvPatchScalarField::write(os);
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
     os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     fixedValue_.writeEntry("fixedValue", os);
     this->writeEntry("value", os);
 #else

@@ -151,7 +151,7 @@ void Foam::inletOutletInternalFvPatchField<Type>::write(Ostream& os) const
     {
         os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     }
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     const Field<Type>& refValue_ = this->refValue();
     refValue_.writeEntry("inletValue", os);
     this->writeEntry("value", os);

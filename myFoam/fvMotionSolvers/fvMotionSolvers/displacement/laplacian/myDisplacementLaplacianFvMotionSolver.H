@@ -98,7 +98,7 @@ public:
         myDisplacementLaplacianFvMotionSolver
         (
             const polyMesh&,
-#if (OPENFOAM >= 1912)    
+#if (OPENFOAM >= 1812)    
             const IOdictionary&
 #else
             const dictionary&

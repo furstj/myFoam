@@ -1,4 +1,4 @@
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
 CorrectPhi
 (
     U,

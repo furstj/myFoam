@@ -167,7 +167,7 @@ void Foam::subsonicOutletVelocityFvPatchVectorField::updateCoeffs()
 void Foam::subsonicOutletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1912)
+    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1812)
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
@@ -176,7 +176,7 @@ void Foam::subsonicOutletVelocityFvPatchVectorField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
     #endif
-    #if (OPENFOAM >= 1912)
+    #if (OPENFOAM >= 1812)
     this->writeEntry("value", os);
     #else
     writeEntry(os, "value", *this);

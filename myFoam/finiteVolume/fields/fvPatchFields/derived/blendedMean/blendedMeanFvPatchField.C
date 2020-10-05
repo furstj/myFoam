@@ -65,7 +65,7 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     meanValue_(ptf.meanValue_.clone()),
     blendFactor_(ptf.blendFactor_.clone())
 #else
@@ -82,7 +82,7 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     meanValue_(ptf.meanValue_.clone()),
     blendFactor_(ptf.blendFactor_.clone())
 #else
@@ -100,7 +100,7 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-#if (OPENFOAM >= 1912)
+#if (OPENFOAM >= 1812)
     meanValue_(ptf.meanValue_.clone()),
     blendFactor_(ptf.blendFactor_.clone())
 #else
@@ -149,7 +149,7 @@ template<class Type>
 void Foam::blendedMeanFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    #if (OPENFOAM >= 1912)
+    #if (OPENFOAM >= 1812)
     fvPatchField<Type>::write(os);
     meanValue_->writeData(os);
     blendFactor_->writeData(os);
