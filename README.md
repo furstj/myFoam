@@ -32,6 +32,12 @@ The installation is quite easy, just do
 There is simple tutorial case in *tutorials/myLuSgsFoam*. Just run `./Allrun`
 inside that directory.
 
+# Notes
+- **Compatibility with OpenFOAM v2012** there is a change in thermodynamics.
+  The sensible enthalpy of ideal gas is calculated in v2012 as `h = cp*(T - Tref) + href`
+  whereas `h = cp*T` in eralier versions. Therefore the solver requires to set
+  `Tref = 0` in `thermophysicalProperties`, see tutorials.
+  
 # How to cite
 Please cite as
 
