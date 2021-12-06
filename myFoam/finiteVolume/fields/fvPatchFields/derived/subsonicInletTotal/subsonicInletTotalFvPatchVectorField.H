@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,12 +37,18 @@ Description
     The boundary condition is valid only for compressible ideal gas and it is
     compatible with totalTemperature for T and totalPressure for p.
 
+See also
+    Foam::mixedFvPatchVectorField
+
+SourceFiles
+    subsonicInletTotalFvPatchVectorField.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef subsonicInletTotalFvPatchVectorFields_H
-#define subsonicInletTotalFvPatchVectorFields_H
+#ifndef subsonicInletTotalFvPatchVectorField_H
+#define subsonicInletTotalFvPatchVectorField_H
 
-#include "fvPatchField.H"
+#include "fvPatchFields.H"
 #include "mixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class subsonicInletTotalFvPatch Declaration
+    Class subsonicInletTotalFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class subsonicInletTotalFvPatchVectorField
@@ -58,14 +66,13 @@ class subsonicInletTotalFvPatchVectorField
 {
     // Private data
 
-    //- Variable storing pressure
-    word pName_;
+        //- Temperature field name
+        word TName_;
 
-    //- Variable storing temperature
-    word TName_;
+       
+        //- Inlet direction
+        vectorField inletDir_;
 
-    //- Inlet direction
-    vectorField inletDir_;
 
 public:
 
@@ -90,7 +97,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given subsonicInletTotalFvPatchVectorField
+        //- Construct by mapping given
+        //  subsonicInletTotalFvPatchVectorField
         //  onto a new patch
         subsonicInletTotalFvPatchVectorField
         (
@@ -111,7 +119,10 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new subsonicInletTotalFvPatchVectorField(*this)
+                new subsonicInletTotalFvPatchVectorField
+                (
+                    *this
+                )
             );
         }
 
@@ -130,26 +141,27 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new subsonicInletTotalFvPatchVectorField(*this, iF)
+                new subsonicInletTotalFvPatchVectorField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
 
     // Member functions
 
+        // Attributes
+
+            //- Return true: this patch field is altered by assignment
+            virtual bool assignable() const
+            {
+                return true;
+            }
+
+
         // Access
-
-            //- Return the name of p
-            const word& pName() const
-            {
-                return pName_;
-            }
-
-            //- Return reference to the name of p to allow adjustment
-            word& pName()
-            {
-                return pName_;
-            }
 
             //- Return the name of T
             const word& TName() const
@@ -163,13 +175,8 @@ public:
                 return TName_;
             }
 
-            const vectorField& inletDir()
-            {
-                return inletDir_;
-            }
 
-
-            // Mapping functions
+        // Mapping functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -185,18 +192,16 @@ public:
             );
 
 
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
 
-        // Member operators
-    
+
+    // Member operators
+
         virtual void operator=(const fvPatchField<vector>& pvf);
-
-
 };
 
 

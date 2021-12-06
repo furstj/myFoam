@@ -2,8 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +30,12 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 #include "totalTemperatureFvPatchScalarField.H"
-#include "inletOutletTotalTemperatureFvPatchScalarField.H"
+// #include "inletOutletTotalTemperatureFvPatchScalarField.H"
 #include "psiThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 Foam::subsonicInletTotalFvPatchVectorField::
 subsonicInletTotalFvPatchVectorField
@@ -42,7 +45,6 @@ subsonicInletTotalFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
-    pName_("p"),
     TName_("T"),
     inletDir_(p.size())
 {
@@ -62,9 +64,8 @@ subsonicInletTotalFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
-    pName_(ptf.pName_),
     TName_(ptf.TName_),
-    inletDir_(mapper(ptf.inletDir_))
+    inletDir_(ptf.inletDir_, mapper)
 {}
 
 
@@ -77,40 +78,39 @@ subsonicInletTotalFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
-    pName_(dict.lookupOrDefault<word>("p", "p")),
-    TName_(dict.lookupOrDefault<word>("T", "T")),
+    TName_(dict.getOrDefault<word>("T", "T")),
     inletDir_("inletDirection", dict, p.size())
 {
+    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
     refGrad() = Zero;
     valueFraction() = 0.0;
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }
+
 
 Foam::subsonicInletTotalFvPatchVectorField::
 subsonicInletTotalFvPatchVectorField
 (
-    const subsonicInletTotalFvPatchVectorField& sfspvf
+    const subsonicInletTotalFvPatchVectorField& pivpvf
 )
 :
-    mixedFvPatchVectorField(sfspvf),
-    pName_(sfspvf.pName_),
-    TName_(sfspvf.TName_),
-    inletDir_(sfspvf.inletDir_)
+    mixedFvPatchVectorField(pivpvf),
+    TName_(pivpvf.TName_),
+    inletDir_(pivpvf.inletDir_)
 {}
 
 
 Foam::subsonicInletTotalFvPatchVectorField::
 subsonicInletTotalFvPatchVectorField
 (
-    const subsonicInletTotalFvPatchVectorField& sfspvf,
+    const subsonicInletTotalFvPatchVectorField& pivpvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    mixedFvPatchVectorField(sfspvf, iF),
-    pName_(sfspvf.pName_),
-    TName_(sfspvf.TName_),
-    inletDir_(sfspvf.inletDir_)
+    mixedFvPatchVectorField(pivpvf, iF),
+    TName_(pivpvf.TName_),
+    inletDir_(pivpvf.inletDir_)
 {}
 
 
@@ -139,24 +139,22 @@ void Foam::subsonicInletTotalFvPatchVectorField::rmap
     mixedFvPatchVectorField::rmap(ptf, addr);
 
     const subsonicInletTotalFvPatchVectorField& tiptf =
-        refCast<const subsonicInletTotalFvPatchVectorField>(ptf);
+        refCast<const subsonicInletTotalFvPatchVectorField>
+        (ptf);
 
     inletDir_.rmap(tiptf.inletDir_, addr);
 }
 
+
 void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
 {
-    if (!size() || updated())
+    if (updated())
     {
         return;
     }
 
-    const fvPatchScalarField& pT = 
-        patch().lookupPatchField<volScalarField, scalar>(TName());
-
-    
     const fvMesh& mesh = patch().boundaryMesh().mesh();
-    
+
     const auto& thermo =
         mesh.lookupObject<psiThermo>("thermophysicalProperties");
 
@@ -168,15 +166,21 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
     scalar R = Cp - Cv;
     scalar gamma = Cp / Cv;
 
+    const volScalarField& T = 
+        db().lookupObject<volScalarField>(TName_);
+
+    const fvPatchScalarField& pT = 
+        patch().patchField<volScalarField, scalar>(T);
+
     scalarField pT0;
     if (pT.type() == "totalTemperature")
     {
         pT0 = refCast<const totalTemperatureFvPatchScalarField>(pT).T0();
     }
-    else if (pT.type() == "inletOutletTotalTemperature")
-    {
-        pT0 = refCast<const inletOutletTotalTemperatureFvPatchScalarField>(pT).T0();
-    }
+//    else if (pT.type() == "inletOutletTotalTemperature")
+//    {
+//        pT0 = refCast<const inletOutletTotalTemperatureFvPatchScalarField>(pT).T0();
+//    }
     else
     {
         FatalErrorIn("subsonicInletTotalFvPatchVectorField::updateCoeffs()") 
@@ -185,9 +189,8 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
             << abort(FatalError);
     }
 
-    const Field<vector>& Uint = internalField();
-    const Field<scalar>& Tint =
-                   db().lookupObject<volScalarField>( TName() );
+    const vectorField& Uint = internalField();
+    const scalarField& Tint = T.internalField();
 
     const vectorField& pSf = patch().Sf();
 
@@ -197,8 +200,8 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
     forAll(pSf, faceI) {
         // Inward normal
         vector n = -pSf[faceI] / mag(pSf[faceI]);
-        vector dir = inletDir()[faceI] / mag(inletDir()[faceI]);
-
+        vector dir = inletDir_[faceI] / mag(inletDir_[faceI]);
+	
         label faceCellI = patch().faceCells()[faceI];
 
         // Total temperature
@@ -209,43 +212,44 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
 
         // Sound speed in the inner cell
         scalar c1 = sqrt(gamma*R*Tint[faceCellI]);
-
+	
         // Riemann invariant
         scalar Rm = u1 - 2*c1/(gamma-1);
-
-        // Calculate sound speed at the boundary via quadratic eq.
+	
+	// Calculate sound speed at the boundary via quadratic eq.
         scalar cb;
         scalar oneByCos = 1 / (n & dir);
         {
-            scalar tmp= oneByCos*oneByCos; 
-            scalar a = 1+2.0/(gamma-1)*tmp;
-            scalar b = 2*tmp*Rm;
-
-            scalar c = (gamma-1)/2.*tmp*Rm*Rm - gamma*R*T0;
-            //Perr << a << "\t" << b << "\t" << c << "\t" << b*b-4*a*c << endl;
-            cb = (-b+sqrt(max(b*b-4*a*c,0.0)))/(2*a);
+	  scalar tmp= oneByCos*oneByCos; 
+	  scalar a = 1+2.0/(gamma-1)*tmp;
+	  scalar b = 2*tmp*Rm;
+	  
+	  scalar c = (gamma-1)/2.*tmp*Rm*Rm - gamma*R*T0;
+	  //Perr << a << "\t" << b << "\t" << c << "\t" << b*b-4*a*c << endl;
+	  cb = (-b+sqrt(max(b*b-4*a*c,0.0)))/(2*a);
         }
         
         scalar ub = 2*cb/(gamma-1) + Rm;
         scalar uMag = ub * oneByCos;
         refValue[faceI] = dir*uMag;
         valFraction[faceI] = pos(ub);
-   }
-    //std::exit(1);
+    }
+    
     mixedFvPatchVectorField::updateCoeffs();
 }
 
 
-void Foam::subsonicInletTotalFvPatchVectorField::write(Ostream& os) const
+void Foam::subsonicInletTotalFvPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     fvPatchVectorField::write(os);
-    #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1812)
-    os.writeEntryIfDifferent<word>("p", "p", pName_);
+#if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1812)
     os.writeEntryIfDifferent<word>("T", "T", TName_);
-    #else
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
+ #else
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
-    #endif
+ #endif
 #if (OPENFOAM >= 1812)
     inletDir_.writeEntry("inletDirection", os);
     this->writeEntry("value", os);
@@ -253,7 +257,9 @@ void Foam::subsonicInletTotalFvPatchVectorField::write(Ostream& os) const
     writeEntry(os, "inletDirection", inletDir_);
     writeEntry(os, "value", *this);
 #endif    
+
 }
+
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
@@ -262,7 +268,11 @@ void Foam::subsonicInletTotalFvPatchVectorField::operator=
     const fvPatchField<vector>& pvf
 )
 {
-    fvPatchField<vector>::operator=(inletDir_*(inletDir_ & pvf));
+    fvPatchField<vector>::operator=
+    (
+        valueFraction()*(inletDir_*(inletDir_ & pvf))
+      + (1 - valueFraction())*pvf
+    );
 }
 
 
@@ -276,7 +286,5 @@ namespace Foam
         subsonicInletTotalFvPatchVectorField
     );
 }
-
-
 
 // ************************************************************************* //
