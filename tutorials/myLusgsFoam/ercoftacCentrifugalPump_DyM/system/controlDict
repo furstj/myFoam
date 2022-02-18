@@ -9,50 +9,52 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p;
+    class       dictionary;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+libs (
+  "libfluidThermophysicalModels.so"
+  "libmyFoam.so"
+);
 
-internalField   uniform 1e5;
+application     myLusgsFoam;
 
-boundaryField
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         0.06;      // Two full revolutions
+
+deltaT          0.03e-3;  
+
+writeControl    runTime;
+
+writeInterval   8.3333e-4;  // Snapshot every ~ 10deg
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression on;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+maxCo 1e3;
+
+rDeltaTSmoothingCoeff 0.1;
+
+functions
 {
-    INLET
-    {
-        type            zeroGradient;
-    }
-    OUTLET
-    {
-        type            fixedValue;
-	value $internalField;
-    }
-    STATOR
-    {
-    	type		empty;
-    }
-    BLADE_ROT
-    {
-        type            zeroGradient;
-    }
-    BLADE_STAT
-    {
-        type            zeroGradient;
-    }
-    AMI_INT
-    {
-        type            cyclicAMI;
-    }   
-    AMI_EXT
-    {
-        type            cyclicAMI;
-    }   
-    HUB_SHROUD
-    {
-        type            empty;
-    }
-}
+};
 
 // ************************************************************************* //
