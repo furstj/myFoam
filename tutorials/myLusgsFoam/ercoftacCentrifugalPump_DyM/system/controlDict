@@ -1,0 +1,60 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+libs (
+  "libfluidThermophysicalModels.so"
+  "libmyFoam.so"
+);
+
+application     myLusgsFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         0.06;      // Two full revolutions
+
+deltaT          0.03e-3;  
+
+writeControl    runTime;
+
+writeInterval   8.3333e-4;  // Snapshot every ~ 10deg
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression on;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+maxCo 1e3;
+
+rDeltaTSmoothingCoeff 0.1;
+
+functions
+{
+};
+
+// ************************************************************************* //
