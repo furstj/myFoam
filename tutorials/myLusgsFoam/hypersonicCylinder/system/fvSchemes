@@ -38,8 +38,6 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    limitedGauss    cellLimited<Venkatakrishnan> Gauss linear 1; 
-    // limitedGauss    cellLimited Gauss linear 1;
     grad(U)         Gauss linear;
     grad(h)         Gauss linear;
 }
@@ -61,9 +59,9 @@ laplacianSchemes
 interpolationSchemes
 {
     default         linear;
-    reconstruct(p)  linearUpwind  limitedGauss;
-    reconstruct(U)  linearUpwindV limitedGauss;
-    reconstruct(T)  linearUpwind  limitedGauss;
+    reconstruct(p)  Minmod 1;
+    reconstruct(U)  Minmod 1;
+    reconstruct(T)  Minmod 1;
 }
 
 snGradSchemes

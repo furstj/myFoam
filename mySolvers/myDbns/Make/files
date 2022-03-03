@@ -4,6 +4,7 @@ dbnsFlux/rusanovFlux/rusanovFlux.C
 dbnsFlux/betaFlux/betaFlux.C
 dbnsFlux/hllcFlux/hllcFlux.C
 dbnsFlux/hllcLMFlux/hllcLMFlux.C
+dbnsFlux/hllLMFlux/hllLMFlux.C
 dbnsFlux/AUSMplusUpFlux/AUSMplusUpFlux.C
 dbnsFlux/AUSMPWplusFlux/AUSMPWplusFlux.C
 dbnsFlux/rotatedFlux/rotatedFlux.C
