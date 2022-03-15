@@ -19,6 +19,7 @@ The package consists of two sub-directories:
     of turbulent compressible flows, 
   - *mySonicLiquidFoam*: transient solver for trans-sonic/supersonic, laminar
     flow of a compressible liquid. 
+  - *myRhoSimpleFOam*: steady state SIMPLE solver for compressible gas with corrections for MRF
 
 # Installation
 The installation is quite easy, just do
