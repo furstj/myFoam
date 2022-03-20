@@ -70,18 +70,17 @@ Foam::motionInterpolation::New(const fvMesh& mesh)
 Foam::autoPtr<Foam::motionInterpolation>
 Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
 {
-    const word type(entry);
+    const word modelType(entry);
 
-    Info<< "Selecting motion interpolation: " << type << endl;
+    Info<< "Selecting motion interpolation: " << modelType << endl;
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(type);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interpolation type "
-            << type << nl << nl
+            << modelType << nl << nl
             << "Valid interpolation types are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
