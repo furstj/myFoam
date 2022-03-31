@@ -57,9 +57,9 @@ Foam::autoPtr<Foam::dbnsFlux> Foam::dbnsFlux::New
 {
     const word fluxName( dict.lookup(key) );
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(fluxName);
+    auto cstrIter = dictionaryConstructorTablePtr_->find(fluxName);
 
-    if (!cstrIter.found())
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (

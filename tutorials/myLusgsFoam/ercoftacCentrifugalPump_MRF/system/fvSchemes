@@ -31,7 +31,7 @@ gradSchemes
 {
     default         Gauss linear;
     limitedGauss    cellLimited Gauss linear 1;
-    venkatakrishnan Venkatakrishnan Gauss linear 5;
+    venkatakrishnan cellLimited<Venkatakrishnan> Gauss linear 1;
 }
 
 divSchemes

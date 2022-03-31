@@ -13,9 +13,6 @@ $(bocos)/subsonicOutletVelocity/subsonicOutletVelocityFvPatchVectorField.C
 $(bocos)/subsonicOutletTemperature/subsonicOutletTemperatureFvPatchScalarField.C
 $(bocos)/blendedMean/blendedMeanFvPatchFields.C
 
-limitedGradSchemes = finiteVolume/finiteVolume/gradSchemes/limitedGradSchemes
-$(limitedGradSchemes)/VenkatakrishnanGrad/VenkatakrishnanGrads.C
-
 ddtSchemes = finiteVolume/finiteVolume/ddtSchemes
 
 LIB = $(FOAM_USER_LIBBIN)/libmyFoam

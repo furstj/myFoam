@@ -65,7 +65,7 @@ subsonicInletTotalFvPatchVectorField
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     TName_(ptf.TName_),
-    inletDir_(ptf.inletDir_, mapper)
+    inletDir_(mapper(ptf.inletDir_))
 {}
 
 
@@ -78,10 +78,10 @@ subsonicInletTotalFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
-    TName_(dict.getOrDefault<word>("T", "T")),
+    TName_(dict.lookupOrDefault<word>("T", "T")),
     inletDir_("inletDirection", dict, p.size())
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
     refGrad() = Zero;

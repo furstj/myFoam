@@ -4,6 +4,7 @@ The repository contains several additional solvers for OpenFOAM. There are
 several branches supporting different versions of OpenFOAM:
 
 - **master** development branch supporting recent OpenFOAM (Foundation and ESI)
+- **OF7** branch for OpenFOAM 7
 - **OF6** branch for OpenFOAM 6 and OpenFOAM v1812
 - **OF5** branch for OpenFOAM 5
 
