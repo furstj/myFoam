@@ -95,11 +95,6 @@ class numericFlux
     //- Energy flux
     surfaceScalarField rhoEFlux_;
     
-    //- Helpers for surface interpolations
-    const surfaceScalarField pos_;
-    const surfaceScalarField neg_;
-
-
     // Private Member Functions
     
     //- Disallow default bitwise copy construct

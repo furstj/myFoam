@@ -84,29 +84,7 @@ Foam::numericFlux::numericFlux
             IOobject::NO_WRITE
         ),
         rhoFlux_*linearInterpolate(thermo.Cv()*T_ + 0.5*magSqr(U_))
-    ),
-    pos_
-    (
-        IOobject
-        (
-            "pos",
-            mesh_.time().timeName(),
-            mesh_
-        ),
-        mesh_,
-        dimensionedScalar("pos", dimless, 1.0)
-    ),
-    neg_
-    (
-        IOobject
-        (
-            "pos",
-            mesh_.time().timeName(),
-            mesh_
-        ),
-        mesh_,
-        dimensionedScalar("pos", dimless, -1.0)
-    )
+    ) 
 {}
 
 
@@ -129,6 +107,9 @@ void Foam::numericFlux::computeFlux()
     // Thermodynamics
     const volScalarField Cv = thermo_.Cv();
     const volScalarField R  = thermo_.Cp() - Cv;
+
+    surfaceScalarField pos_(IOobject("pos", mesh_), mesh_, dimensionedScalar("one", dimless, 1.0));
+    surfaceScalarField neg_(IOobject("neg", mesh_), mesh_, dimensionedScalar("minusOne", dimless, -1.0));
 
     surfaceScalarField p_pos( interpolate(p_, pos_) );
     surfaceScalarField p_neg( interpolate(p_, neg_) );
