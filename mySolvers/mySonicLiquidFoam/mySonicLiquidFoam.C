@@ -32,9 +32,11 @@ Description
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
-#include "turbulentTransportModel.H"
+#include "kinematicMomentumTransportModel.H"
 #include "pimpleControl.H"
-#include "fvOptions.H"
+#include "fvModels.H"
+#include "fvConstraints.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,16 +70,16 @@ int main(int argc, char *argv[])
             (
                 fvm::ddt(rho, U)
               + fvm::div(phi, U)
-	      + turbulence->divDevRhoReff(rho, U)
+	      + turbulence->divDevSigma(U)
 	      ==
-	      fvOptions(rho, U)
+	      fvModels.source(rho, U)
             );
 
-            fvOptions.constrain(UEqn);
+            fvConstraints.constrain(UEqn);
 
             solve(UEqn == -fvc::grad(p));
 
-	    fvOptions.correct(U);
+	    fvConstraints.constrain(U);
 
             // --- Pressure corrector loop
             while (pimple.correct())
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
 
                 U -= rAU*fvc::grad(p);
                 U.correctBoundaryConditions();
-		fvOptions.correct(U);
+		fvConstraints.constrain(U);
             }
 
 	    phiv==(phi/fvc::interpolate(rho));

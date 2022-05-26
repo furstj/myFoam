@@ -65,10 +65,11 @@ mesh.setFluxRequired(p.name());
 Info<< "Creating turbulence model\n" << endl;
 singlePhaseTransportModel laminarTransport(U, phiv);
 
-autoPtr<incompressible::turbulenceModel> turbulence
+autoPtr<incompressible::momentumTransportModel> turbulence
 (
-    incompressible::turbulenceModel::New(U, phiv, laminarTransport)
+    incompressible::momentumTransportModel::New(U, phiv, laminarTransport)
 );
 
-#include "createFvOptions.H"
+#include "createFvModels.H"
+#include "createFvConstraints.H"
 
