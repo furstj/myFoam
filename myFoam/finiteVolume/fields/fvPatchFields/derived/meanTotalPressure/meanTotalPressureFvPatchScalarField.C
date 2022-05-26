@@ -100,22 +100,6 @@ Foam::meanTotalPressureFvPatchScalarField::meanTotalPressureFvPatchScalarField
 
 Foam::meanTotalPressureFvPatchScalarField::meanTotalPressureFvPatchScalarField
 (
-    const meanTotalPressureFvPatchScalarField& tppsf
-)
-:
-    fixedValueFvPatchScalarField(tppsf),
-    UName_(tppsf.UName_),
-    phiName_(tppsf.phiName_),
-    rhoName_(tppsf.rhoName_),
-    psiName_(tppsf.psiName_),
-    gamma_(tppsf.gamma_),
-    p0_(tppsf.p0_),
-    meanValue_(tppsf.meanValue_)
-{}
-
-
-Foam::meanTotalPressureFvPatchScalarField::meanTotalPressureFvPatchScalarField
-(
     const meanTotalPressureFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )

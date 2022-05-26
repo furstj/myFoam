@@ -145,16 +145,7 @@ public:
     mixingPlaneFvPatchField
     (
         const mixingPlaneFvPatchField<Type>&
-    );
-
-    //- Construct and return a clone
-    virtual tmp<fvPatchField<Type> > clone() const
-        {
-            return tmp<fvPatchField<Type> >
-                (
-                    new mixingPlaneFvPatchField<Type>(*this)
-                );
-        }
+    ) = delete;
 
     //- Construct as copy setting internal field reference
     mixingPlaneFvPatchField

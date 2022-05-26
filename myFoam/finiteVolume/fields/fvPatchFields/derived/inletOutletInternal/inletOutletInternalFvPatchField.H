@@ -132,16 +132,7 @@ public:
         inletOutletInternalFvPatchField
         (
             const inletOutletInternalFvPatchField<Type>&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
-        {
-            return tmp<fvPatchField<Type> >
-            (
-                new inletOutletInternalFvPatchField<Type>(*this)
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         inletOutletInternalFvPatchField

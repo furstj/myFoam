@@ -90,20 +90,6 @@ totalPressureDirectedInletOutletVelocityFvPatchVectorField
     valueFraction() = 0.0;
 }
 
-Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::
-totalPressureDirectedInletOutletVelocityFvPatchVectorField
-(
-    const totalPressureDirectedInletOutletVelocityFvPatchVectorField& sfspvf
-)
-  :
-  mixedFvPatchVectorField(sfspvf),
-  psiName_(sfspvf.psiName_),
-  phiName_(sfspvf.phiName_),
-  gamma_(sfspvf.gamma_),
-  p0_(sfspvf.p0_),
-  inletDir_(sfspvf.inletDir_)
-{}
-
 
 Foam::totalPressureDirectedInletOutletVelocityFvPatchVectorField::
 totalPressureDirectedInletOutletVelocityFvPatchVectorField

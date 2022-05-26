@@ -115,19 +115,7 @@ public:
         mixedSubsonicSupersonicOutletFvPatchScalarField
         (
             const mixedSubsonicSupersonicOutletFvPatchScalarField&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new mixedSubsonicSupersonicOutletFvPatchScalarField
-                (
-                    *this
-                )
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         mixedSubsonicSupersonicOutletFvPatchScalarField

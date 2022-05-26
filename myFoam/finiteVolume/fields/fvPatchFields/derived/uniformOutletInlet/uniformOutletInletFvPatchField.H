@@ -134,16 +134,7 @@ public:
         uniformOutletInletFvPatchField
         (
             const uniformOutletInletFvPatchField<Type>&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
-        {
-            return tmp<fvPatchField<Type> >
-            (
-                new uniformOutletInletFvPatchField<Type>(*this)
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         uniformOutletInletFvPatchField

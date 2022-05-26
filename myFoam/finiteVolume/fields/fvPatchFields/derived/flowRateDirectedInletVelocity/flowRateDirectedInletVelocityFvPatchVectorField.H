@@ -162,27 +162,17 @@ public:
         const fvPatchFieldMapper&
     );
     
-    //- Construct as copy
-    flowRateDirectedInletVelocityFvPatchVectorField
-    (
-        const flowRateDirectedInletVelocityFvPatchVectorField&
-    );
-    
-    //- Construct and return a clone
-    virtual tmp<fvPatchVectorField> clone() const
-        {
-            return tmp<fvPatchVectorField>
-                (
-                new flowRateDirectedInletVelocityFvPatchVectorField(*this)
-                );
-        }
-    
     //- Construct as copy setting internal field reference
     flowRateDirectedInletVelocityFvPatchVectorField
     (
         const flowRateDirectedInletVelocityFvPatchVectorField&,
         const DimensionedField<vector, volMesh>&
     );
+    
+    flowRateDirectedInletVelocityFvPatchVectorField
+    (
+        const flowRateDirectedInletVelocityFvPatchVectorField&
+    ) = delete;
     
     //- Construct and return a clone setting internal field reference
     virtual tmp<fvPatchVectorField> clone

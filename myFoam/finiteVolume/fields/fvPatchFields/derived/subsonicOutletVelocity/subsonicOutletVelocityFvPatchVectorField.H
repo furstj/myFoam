@@ -104,16 +104,7 @@ public:
         subsonicOutletVelocityFvPatchVectorField
         (
             const subsonicOutletVelocityFvPatchVectorField&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchVectorField> clone() const
-        {
-            return tmp<fvPatchVectorField>
-            (
-                new subsonicOutletVelocityFvPatchVectorField(*this)
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         subsonicOutletVelocityFvPatchVectorField

@@ -82,20 +82,6 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
 template<class Type>
 Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
 (
-    const mixingPlaneFvPatchField<Type>& ptf
-)
-:
-    fixedValueFvPatchField<Type>(ptf),
-    origin_(ptf.origin_),
-    axis_(ptf.axis_),
-    order_(ptf.order_),
-    source_(ptf.source_)
-{}
-
-
-template<class Type>
-Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
-(
     const mixingPlaneFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )

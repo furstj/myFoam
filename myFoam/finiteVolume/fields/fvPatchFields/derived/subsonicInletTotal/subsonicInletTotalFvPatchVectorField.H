@@ -112,19 +112,7 @@ public:
         subsonicInletTotalFvPatchVectorField
         (
             const subsonicInletTotalFvPatchVectorField&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchVectorField> clone() const
-        {
-            return tmp<fvPatchVectorField>
-            (
-                new subsonicInletTotalFvPatchVectorField
-                (
-                    *this
-                )
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         subsonicInletTotalFvPatchVectorField

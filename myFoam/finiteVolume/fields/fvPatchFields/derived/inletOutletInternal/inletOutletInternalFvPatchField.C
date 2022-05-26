@@ -91,17 +91,6 @@ Foam::inletOutletInternalFvPatchField<Type>::inletOutletInternalFvPatchField
 template<class Type>
 Foam::inletOutletInternalFvPatchField<Type>::inletOutletInternalFvPatchField
 (
-    const inletOutletInternalFvPatchField<Type>& ptf
-)
-:
-    mixedFvPatchField<Type>(ptf),
-    phiName_(ptf.phiName_)
-{}
-
-
-template<class Type>
-Foam::inletOutletInternalFvPatchField<Type>::inletOutletInternalFvPatchField
-(
     const inletOutletInternalFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )

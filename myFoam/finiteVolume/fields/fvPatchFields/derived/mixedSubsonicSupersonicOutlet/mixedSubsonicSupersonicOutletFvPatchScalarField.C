@@ -100,19 +100,6 @@ mixedSubsonicSupersonicOutletFvPatchScalarField
 mixedSubsonicSupersonicOutletFvPatchScalarField::
 mixedSubsonicSupersonicOutletFvPatchScalarField
 (
-    const mixedSubsonicSupersonicOutletFvPatchScalarField& pivpvf
-)
-:
-    mixedFvPatchScalarField(pivpvf),
-    TName_(pivpvf.TName_),
-    fixedValue_(pivpvf.fixedValue_),
-    UName_(pivpvf.UName_)
-{}
-
-
-mixedSubsonicSupersonicOutletFvPatchScalarField::
-mixedSubsonicSupersonicOutletFvPatchScalarField
-(
     const mixedSubsonicSupersonicOutletFvPatchScalarField& pivpvf,
     const DimensionedField<scalar, volMesh>& iF
 )

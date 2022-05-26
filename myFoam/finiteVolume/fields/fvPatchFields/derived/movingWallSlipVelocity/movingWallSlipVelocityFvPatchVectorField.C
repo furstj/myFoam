@@ -73,16 +73,6 @@ movingWallSlipVelocityFvPatchVectorField
 Foam::movingWallSlipVelocityFvPatchVectorField::
 movingWallSlipVelocityFvPatchVectorField
 (
-    const movingWallSlipVelocityFvPatchVectorField& mwvpvf
-)
-:
-    fixedValueFvPatchVectorField(mwvpvf)
-{}
-
-
-Foam::movingWallSlipVelocityFvPatchVectorField::
-movingWallSlipVelocityFvPatchVectorField
-(
     const movingWallSlipVelocityFvPatchVectorField& mwvpvf,
     const DimensionedField<vector, volMesh>& iF
 )

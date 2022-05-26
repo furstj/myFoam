@@ -92,8 +92,6 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
     uniformOutletValue_(ptf.uniformOutletValue_, false)
 #endif
 {
-    this->patchType() = ptf.patchType();
-
     // Evaluate refValue since not mapped
     this->refValue() =
         uniformOutletValue_->value(this->db().time().timeOutputValue());
@@ -109,22 +107,6 @@ Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
     mapper(*this, ptf);
 #endif
 }
-
-
-template<class Type>
-Foam::uniformOutletInletFvPatchField<Type>::uniformOutletInletFvPatchField
-(
-    const uniformOutletInletFvPatchField<Type>& ptf
-)
-:
-    mixedFvPatchField<Type>(ptf),
-    phiName_(ptf.phiName_),
-#if (OPENFOAM_PLUS >= 1812 || OPENFOAM >= 1812)
-    uniformOutletValue_(ptf.uniformOutletValue_.clone())
-#else
-    uniformOutletValue_(ptf.uniformOutletValue_, false)
-#endif	
-{}
 
 
 template<class Type>
@@ -177,10 +159,11 @@ void Foam::uniformOutletInletFvPatchField<Type>::write(Ostream& os) const
     {
         os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     }
-    this->uniformOutletValue_->writeData(os);
 #if (OPENFOAM >= 1812)
+    this->uniformOutletValue_->writeData(os);
     this->writeEntry("value", os);
 #else
+    writeEntry(os, this->uniformOutletValue_());
     writeEntry(os, "value", *this);
 #endif
 }

@@ -81,24 +81,11 @@ subsonicInletTotalFvPatchVectorField
     TName_(dict.lookupOrDefault<word>("T", "T")),
     inletDir_("inletDirection", dict, p.size())
 {
-    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
     refGrad() = Zero;
     valueFraction() = 0.0;
 }
-
-
-Foam::subsonicInletTotalFvPatchVectorField::
-subsonicInletTotalFvPatchVectorField
-(
-    const subsonicInletTotalFvPatchVectorField& pivpvf
-)
-:
-    mixedFvPatchVectorField(pivpvf),
-    TName_(pivpvf.TName_),
-    inletDir_(pivpvf.inletDir_)
-{}
 
 
 Foam::subsonicInletTotalFvPatchVectorField::

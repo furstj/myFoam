@@ -108,16 +108,7 @@ public:
         subsonicOutletTemperatureFvPatchScalarField
         (
             const subsonicOutletTemperatureFvPatchScalarField&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new subsonicOutletTemperatureFvPatchScalarField(*this)
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         subsonicOutletTemperatureFvPatchScalarField

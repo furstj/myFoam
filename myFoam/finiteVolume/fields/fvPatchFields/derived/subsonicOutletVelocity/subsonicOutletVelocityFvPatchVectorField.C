@@ -100,19 +100,6 @@ subsonicOutletVelocityFvPatchVectorField
 Foam::subsonicOutletVelocityFvPatchVectorField::
 subsonicOutletVelocityFvPatchVectorField
 (
-    const subsonicOutletVelocityFvPatchVectorField& sfspvf
-)
-:
-    mixedFvPatchVectorField(sfspvf),
-    pName_(sfspvf.pName_),
-    rhoName_(sfspvf.rhoName_),
-    psiName_(sfspvf.psiName_)
-{}
-
-
-Foam::subsonicOutletVelocityFvPatchVectorField::
-subsonicOutletVelocityFvPatchVectorField
-(
     const subsonicOutletVelocityFvPatchVectorField& sfspvf,
     const DimensionedField<vector, volMesh>& iF
 )

@@ -113,22 +113,6 @@ temperatureDirectedInletOutletVelocityFvPatchVectorField
 temperatureDirectedInletOutletVelocityFvPatchVectorField::
 temperatureDirectedInletOutletVelocityFvPatchVectorField
 (
-    const temperatureDirectedInletOutletVelocityFvPatchVectorField& pivpvf
-)
-:
-    mixedFvPatchVectorField(pivpvf),
-    phiName_(pivpvf.phiName_),
-    TName_(pivpvf.TName_),
-    T0_(pivpvf.T0_),
-    inletDir_(pivpvf.inletDir_),
-    cylindricalCCS_(pivpvf.cylindricalCCS_),
-    omega_(pivpvf.omega_)
-{}
-
-
-temperatureDirectedInletOutletVelocityFvPatchVectorField::
-temperatureDirectedInletOutletVelocityFvPatchVectorField
-(
     const temperatureDirectedInletOutletVelocityFvPatchVectorField& pivpvf,
     const DimensionedField<vector, volMesh>& iF
 )

@@ -205,16 +205,7 @@ public:
         meanTotalPressureFvPatchScalarField
         (
             const meanTotalPressureFvPatchScalarField&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new meanTotalPressureFvPatchScalarField(*this)
-            );
-        }
+        ) = delete;
 
         //- Construct as copy setting internal field reference
         meanTotalPressureFvPatchScalarField

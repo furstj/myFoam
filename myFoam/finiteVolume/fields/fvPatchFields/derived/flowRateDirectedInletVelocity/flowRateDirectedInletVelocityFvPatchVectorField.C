@@ -120,21 +120,6 @@ flowRateDirectedInletVelocityFvPatchVectorField
 Foam::flowRateDirectedInletVelocityFvPatchVectorField::
 flowRateDirectedInletVelocityFvPatchVectorField
 (
-    const flowRateDirectedInletVelocityFvPatchVectorField& ptf
-)
-:
-    fixedValueFvPatchField<vector>(ptf),
-    flowRate_(ptf.flowRate_().clone().ptr()),
-    volumetric_(ptf.volumetric_),
-    rhoName_(ptf.rhoName_),
-    rhoInlet_(ptf.rhoInlet_),
-    inletDir_(ptf.inletDir_)
-{}
-
-
-Foam::flowRateDirectedInletVelocityFvPatchVectorField::
-flowRateDirectedInletVelocityFvPatchVectorField
-(
     const flowRateDirectedInletVelocityFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
@@ -203,7 +188,6 @@ void Foam::flowRateDirectedInletVelocityFvPatchVectorField::updateCoeffs()
 void Foam::flowRateDirectedInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
-    flowRate_->writeData(os);
     if (!volumetric_)
     {
         #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1812)
@@ -215,9 +199,11 @@ void Foam::flowRateDirectedInletVelocityFvPatchVectorField::write(Ostream& os) c
         #endif
     }
 #if (OPENFOAM >= 1812)
+    flowRate_->writeData(os);
     inletDir_.writeEntry("inletDirection", os);
     this->writeEntry("value", os);
 #else
+    writeEntry(os, this->flowRate_());
     writeEntry(os, "inletDirection", inletDir_);
     writeEntry(os, "value", *this);
 #endif

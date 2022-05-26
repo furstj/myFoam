@@ -78,23 +78,6 @@ Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 template<class Type>
 Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
 (
-    const blendedMeanFvPatchField<Type>& ptf
-)
-:
-    fixedValueFvPatchField<Type>(ptf),
-#if (OPENFOAM >= 1812)
-    meanValue_(ptf.meanValue_.clone()),
-    blendFactor_(ptf.blendFactor_.clone())
-#else
-    meanValue_(ptf.meanValue_, false),
-    blendFactor_(ptf.blendFactor_, false)
-#endif
-{}
-
-
-template<class Type>
-Foam::blendedMeanFvPatchField<Type>::blendedMeanFvPatchField
-(
     const blendedMeanFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )

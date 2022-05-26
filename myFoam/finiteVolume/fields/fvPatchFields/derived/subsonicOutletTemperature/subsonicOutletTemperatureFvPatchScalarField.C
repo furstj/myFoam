@@ -101,19 +101,6 @@ subsonicOutletTemperatureFvPatchScalarField
 Foam::subsonicOutletTemperatureFvPatchScalarField::
 subsonicOutletTemperatureFvPatchScalarField
 (
-    const subsonicOutletTemperatureFvPatchScalarField& sfspvf
-)
-:
-    mixedFvPatchScalarField(sfspvf),
-    pName_(sfspvf.pName_),
-    rhoName_(sfspvf.rhoName_),
-    psiName_(sfspvf.psiName_)
-{}
-
-
-Foam::subsonicOutletTemperatureFvPatchScalarField::
-subsonicOutletTemperatureFvPatchScalarField
-(
     const subsonicOutletTemperatureFvPatchScalarField& sfspvf,
     const DimensionedField<scalar, volMesh>& iF
 )

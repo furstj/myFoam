@@ -131,16 +131,7 @@ public:
         blendedMeanFvPatchField
         (
             const blendedMeanFvPatchField<Type>&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchField<Type>> clone() const
-        {
-            return tmp<fvPatchField<Type>>
-            (
-                new blendedMeanFvPatchField<Type>(*this)
-            );
-        }
+        ) = delete;
 
         //- Copy constructor setting internal field reference
         blendedMeanFvPatchField
