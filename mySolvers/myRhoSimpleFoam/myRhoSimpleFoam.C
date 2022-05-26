@@ -36,10 +36,12 @@ Description
 
 #include "fvCFD.H"
 #include "fluidThermo.H"
-#include "turbulentFluidThermoModel.H"
+#include "dynamicMomentumTransportModel.H"
+#include "fluidThermophysicalTransportModel.H"
 #include "simpleControl.H"
-#include "pressureControl.H"
-#include "fvOptions.H"
+#include "pressureReference.H"
+#include "fvModels.H"
+#include "fvConstraints.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,20 +72,15 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        fvModels.correct();
+
         // Pressure-velocity SIMPLE corrector
         #include "UEqn.H"
         #include "EEqn.H"
-
-        if (simple.consistent())
-        {
-            #include "pcEqn.H"
-        }
-        else
-        {
-            #include "pEqn.H"
-        }
+        #include "pEqn.H"
 
         turbulence->correct();
+        thermophysicalTransport->correct();
 
         runTime.write();
 

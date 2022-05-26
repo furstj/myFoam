@@ -15,19 +15,19 @@
           ? fvc::div(phi, volScalarField("Ekp", 0.5*magSqr(U) + p/rho))
           : fvc::div(phi, volScalarField("K", 0.5*magSqr(U)))
         )
-      - fvm::laplacian(turbulence->alphaEff(), he)
+      + thermophysicalTransport->divq(he)
       + fvc::div(mshPhi,p)
      ==
-        fvOptions(rho, he)
+        fvModels.source(rho, he)
     );
 
     EEqn.relax();
 
-    fvOptions.constrain(EEqn);
+    fvConstraints.constrain(EEqn);
 
     EEqn.solve();
 
-    fvOptions.correct(he);
+    fvConstraints.constrain(he);
 
     thermo.correct();
 }
