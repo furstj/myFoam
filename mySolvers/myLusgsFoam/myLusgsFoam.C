@@ -42,11 +42,14 @@ Author
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
+#include "dynamicMomentumTransportModel.H"
+#include "fluidThermophysicalTransportModel.H"
 #include "psiThermo.H"
-#include "turbulentFluidThermoModel.H"
 #include "bound.H"
 #include "boundMinMax.H"
 #include "numericFlux.H"
+#include "fvModels.H"
+#include "fvConstraints.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 
@@ -120,14 +123,14 @@ int main(int argc, char *argv[])
                 fvc::ddt(rhoU)
                 + fvc::div(dbnsFlux.rhoUFlux())
                 + MRF.DDt(rho,U)
-                + fvc::div(turbulence->devRhoReff()) 
+                + fvc::div(turbulence->devTau()) 
             )); 
 
             volScalarField dRhoE(-dt*( 
                 fvc::ddt(rhoE)
                 + fvc::div(dbnsFlux.rhoEFlux()) 
-                + fvc::div(turbulence->devRhoReff() & U)
-                - fvc::laplacian(turbulence->alphaEff(), h) 
+                + fvc::div(turbulence->devTau() & U)
+                + fvc::div(thermophysicalTransport->q())
             ));
             
             scalar rezRho  = fvc::domainIntegrate( mag(dRho) / dt ).value();
@@ -177,8 +180,11 @@ int main(int argc, char *argv[])
                 (finalRezRhoE < lusgsTolerance) );
 
 	    if ((!turbOnFinalIterOnly) || lastIteration)
-	      turbulence->correct();
-
+            {
+                turbulence->correct();
+                thermophysicalTransport->correct();
+            }
+            
             if (lastIteration) {
                 Info << "LUSGS: converged in " << intIter+1 << " iterations." << nl;
                 break;
