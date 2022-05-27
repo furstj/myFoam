@@ -8,7 +8,7 @@
     const volScalarField a( sqrt( kappa / thermo.psi() ) );
     const volScalarField nuMax( "nuMax", max(
         4./3.0 * turbulence->nuEff(),
-        kappa * turbulence->alphaEff()/rho
+        kappa * thermophysicalTransport->alphaEff()/rho
     ));
 
     // ALE mesh velocity + velocity due to MRF

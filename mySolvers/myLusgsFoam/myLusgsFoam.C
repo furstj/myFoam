@@ -43,7 +43,8 @@ Author
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "psiThermo.H"
-#include "turbulentFluidThermoModel.H"
+#include "fluidThermoMomentumTransportModel.H"
+#include "fluidThermophysicalTransportModel.H"
 #include "bound.H"
 #include "boundMinMax.H"
 #include "numericFlux.H"
@@ -120,14 +121,15 @@ int main(int argc, char *argv[])
                 fvc::ddt(rhoU)
                 + fvc::div(dbnsFlux.rhoUFlux())
                 + MRF.DDt(rho,U)
-                + fvc::div(turbulence->devRhoReff()) 
+                + fvc::div(turbulence->devTau()) 
             )); 
 
             volScalarField dRhoE(-dt*( 
                 fvc::ddt(rhoE)
                 + fvc::div(dbnsFlux.rhoEFlux()) 
-                + fvc::div(turbulence->devRhoReff() & U)
-                - fvc::laplacian(turbulence->alphaEff(), h) 
+                + fvc::div(turbulence->devTau() & U)
+                + fvc::div(thermophysicalTransport->q())
+
             ));
             
             scalar rezRho  = fvc::domainIntegrate( mag(dRho) / dt ).value();

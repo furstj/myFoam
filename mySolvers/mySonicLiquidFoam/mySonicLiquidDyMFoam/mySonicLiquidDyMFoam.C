@@ -33,7 +33,7 @@ Description
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
-#include "turbulentTransportModel.H"
+#include "kinematicMomentumTransportModel.H"
 #include "pimpleControl.H"
 #include "CorrectPhi.H"
 #include "fvOptions.H"
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
             (
                 fvm::ddt(rho, U)
               + fvm::div(phi, U)
-		+ turbulence->divDevRhoReff(rho, U)
+	      + turbulence->divDevSigma(U)
               ==
                 fvOptions(rho, U)
             );
