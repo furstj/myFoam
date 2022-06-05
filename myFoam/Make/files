@@ -1,6 +1,7 @@
 bocos = finiteVolume/fields/fvPatchFields/derived
 $(bocos)/temperatureDirectedInletOutletVelocity/temperatureDirectedInletOutletVelocityFvPatchVectorField.C
 $(bocos)/totalPressureDirectedInletOutletVelocity/totalPressureDirectedInletOutletVelocityFvPatchVectorField.C
+$(bocos)/totalPressureDirectedInletVelocity/totalPressureDirectedInletVelocityFvPatchVectorField.C
 $(bocos)/uniformOutletInlet/uniformOutletInletFvPatchFields.C
 $(bocos)/inletOutletInternal/inletOutletInternalFvPatchFields.C
 $(bocos)/mixedSubsonicSupersonicOutlet/mixedSubsonicSupersonicOutletFvPatchScalarField.C

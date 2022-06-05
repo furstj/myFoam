@@ -46,6 +46,7 @@ Author
 #include "turbulentFluidThermoModel.H"
 #include "bound.H"
 #include "boundMinMax.H"
+#include "clipMinMax.H"
 #include "numericFlux.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
