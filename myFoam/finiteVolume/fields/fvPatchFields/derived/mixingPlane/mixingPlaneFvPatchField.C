@@ -40,7 +40,8 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     origin_(Zero),
     axis_(Zero),
     order_(Zero),
-    source_()
+    source_(),
+    parametrization_("radial")
 {}
 
 
@@ -57,7 +58,8 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     origin_(ptf.origin_),
     axis_(ptf.axis_),
     order_(ptf.order_),
-    source_(ptf.source_)
+    source_(ptf.source_),
+    parametrization_(ptf.parametrization_)
 {}
 
 
@@ -73,9 +75,16 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     origin_(dict.lookupOrDefault<vector>("origin", vector(0,0,0))),
     axis_(dict.lookupOrDefault<vector>("axis", vector(1,0,0))),
     order_(dict.lookupOrDefault<label>("order", 0)),
-    source_(dict.lookup("source"))
+    source_(dict.lookup("source")),
+    parametrization_(dict.lookupOrDefault<word>("parametrization", "radial"))
 {
     axis_ /= mag(axis_);
+    if ( (parametrization_ != "radial") && (parametrization_ != "axial") ) 
+    {
+        FatalError 
+            << "Parametrization can be either radial or axial!" << nl
+            << exit(FatalError);
+    }
 }
 
 
@@ -89,7 +98,8 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     origin_(ptf.origin_),
     axis_(ptf.axis_),
     order_(ptf.order_),
-    source_(ptf.source_)
+    source_(ptf.source_),
+    parametrization_(ptf.parametrization_)
 {}
 
 
@@ -104,7 +114,8 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     origin_(ptf.origin_),
     axis_(ptf.axis_),
     order_(ptf.order_),
-    source_(ptf.source_)
+    source_(ptf.source_),
+    parametrization_(ptf.parametrization_)
 {}
 
 
@@ -150,10 +161,18 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
     forAll(sourcePatchField, i)
     {
         vector r = sourcePatch.Cf()[i] - this->origin_;
-        r -= (this->axis_ & r)*this->axis_;
-        scalar w = sourcePatch.magSf()[i];
-        scalar xi = mag(r);
+        scalar xi;
+        if (parametrization_ == "radial") 
+        { 
+            r -= (this->axis_ & r)*this->axis_;
+            xi = mag(r);
+        }
+        else
+        {
+            xi = this->axis_ & r;
+        }
         Type   yi = toXRTheta(sourcePatchField[i], r/mag(r));
+        scalar w = sourcePatch.magSf()[i];
         for (label j=0; j<n; j++)
         {
             for (label k=0; k<=j; k++)
@@ -163,6 +182,7 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
             ATb[j] += sqr(w)*pow(xi,j)*yi;
         }        
     }
+ 
 #if (OPENFOAM >= 1812)
     for (label i=0; i<n; i++)
         for (label j=0; j<n; j++)
@@ -178,8 +198,16 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
     forAll(patchField, i)
     {
         vector r = p.Cf()[i] - this->origin_;
-        r -= (this->axis_ & r)*this->axis_;
-        scalar x = mag(r);
+        scalar x;
+        if (parametrization_ == "radial")
+        {
+            r -= (this->axis_ & r)*this->axis_;
+            x = mag(r);
+        }
+        else
+        {
+            x = this->axis_ & r;
+        }
         Type val(Zero);
         for (label j=0; j<n; j++)
         {
@@ -200,6 +228,7 @@ void Foam::mixingPlaneFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
     os.writeKeyword("order") << order_ << token::END_STATEMENT << nl;
     os.writeKeyword("source") << source_ << token::END_STATEMENT << nl;
+    os.writeKeyword("parametrization") << parametrization_ << token::END_STATEMENT << nl;
 #if (OPENFOAM >= 1812)
     this->writeEntry("value", os);
 #else

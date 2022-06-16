@@ -108,7 +108,9 @@ protected:
     //- Name of the neighbour patch
     const word source_;
 
-
+    //- Parametrization (axial/radial)
+    const word parametrization_;
+    
 public:
 
     //- Runtime type information
