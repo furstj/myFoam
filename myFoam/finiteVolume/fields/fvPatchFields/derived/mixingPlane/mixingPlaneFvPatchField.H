@@ -39,7 +39,8 @@
     source     | name of the neighbour patch    | yes      |
     order      | order of the polynomial        | yes      | 
     origin     | point at the axis of rotation  | no       | (0 0 0)
-    axis       | the axis of rotation           | no       | (1 0 0)    
+    axis       | the axis of rotation           | no       | (1 0 0)   
+    parametrization | radial or axial           | no       | radial 
     \endtable
 
     Example of the boundary condition specification for patch at rotor side of a
@@ -53,11 +54,14 @@
     origin          (0 0 0);
     axis            (1 0 0);
     value           uniform 0;
+    parametrization radial;
     }
     \endverbatim
 
     Notes
     - the stator side should use zeroGradient
+    - radial parametrization assumes values as f(r) (usefull for axial flow)
+    - axial parametrization assumes values as f(x) (usefull for radial flow)
  
     SeeAlso
     Foam::fixedValueFvPatchField
@@ -110,7 +114,7 @@ protected:
 
     //- Parametrization (axial/radial)
     const word parametrization_;
-    
+
 public:
 
     //- Runtime type information
