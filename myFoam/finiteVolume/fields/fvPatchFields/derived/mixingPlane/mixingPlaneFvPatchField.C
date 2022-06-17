@@ -160,16 +160,17 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
     
     forAll(sourcePatchField, i)
     {
-        vector r = sourcePatch.Cf()[i] - this->origin_;
+        vector pos = sourcePatch.Cf()[i] - this->origin_;
+        vector r = pos - (this->axis_ & pos)*this->axis_;
+        
         scalar xi;
         if (parametrization_ == "radial") 
         { 
-            r -= (this->axis_ & r)*this->axis_;
             xi = mag(r);
         }
         else
         {
-            xi = this->axis_ & r;
+            xi = this->axis_ & pos;
         }
         Type   yi = toXRTheta(sourcePatchField[i], r/mag(r));
         scalar w = sourcePatch.magSf()[i];
@@ -197,16 +198,16 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
     Field<Type>& patchField = *this;
     forAll(patchField, i)
     {
-        vector r = p.Cf()[i] - this->origin_;
+        vector pos = sourcePatch.Cf()[i] - this->origin_;
+        vector r = pos - (this->axis_ & pos)*this->axis_;
         scalar x;
         if (parametrization_ == "radial")
         {
-            r -= (this->axis_ & r)*this->axis_;
             x = mag(r);
         }
         else
         {
-            x = this->axis_ & r;
+            x = this->axis_ & pos;
         }
         Type val(Zero);
         for (label j=0; j<n; j++)
