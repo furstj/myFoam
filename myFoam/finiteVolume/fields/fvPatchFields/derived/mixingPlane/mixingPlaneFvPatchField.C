@@ -27,6 +27,7 @@ License
 #include "mixingPlaneFvPatchField.H"
 #include "volFields.H"
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -41,7 +42,7 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     axis_(Zero),
     order_(Zero),
     source_(),
-    parametrization_("radial")
+    parametrization_(RADIAL)
 {}
 
 
@@ -76,10 +77,20 @@ Foam::mixingPlaneFvPatchField<Type>::mixingPlaneFvPatchField
     axis_(dict.lookupOrDefault<vector>("axis", vector(1,0,0))),
     order_(dict.lookupOrDefault<label>("order", 0)),
     source_(dict.lookup("source")),
-    parametrization_(dict.lookupOrDefault<word>("parametrization", "radial"))
+    parametrization_()
 {
     axis_ /= mag(axis_);
-    if ( (parametrization_ != "radial") && (parametrization_ != "axial") ) 
+
+    word param = dict.lookupOrDefault<word>("parametrization", "radial");
+    if (param == "radial")
+    {
+        parametrization_ = RADIAL;
+    }
+    else if (param == "axial")
+    {
+        parametrization_ = AXIAL;        
+    }
+    else
     {
         FatalError 
             << "Parametrization can be either radial or axial!" << nl
@@ -164,7 +175,7 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
         vector r = pos - (this->axis_ & pos)*this->axis_;
         
         scalar xi;
-        if (parametrization_ == "radial") 
+        if (parametrization_ == RADIAL) 
         { 
             xi = mag(r);
         }
@@ -198,10 +209,10 @@ void Foam::mixingPlaneFvPatchField<Type>::updateCoeffs()
     Field<Type>& patchField = *this;
     forAll(patchField, i)
     {
-        vector pos = sourcePatch.Cf()[i] - this->origin_;
+        vector pos = p.Cf()[i] - this->origin_;
         vector r = pos - (this->axis_ & pos)*this->axis_;
         scalar x;
-        if (parametrization_ == "radial")
+        if (parametrization_ == RADIAL)
         {
             x = mag(r);
         }
@@ -229,7 +240,18 @@ void Foam::mixingPlaneFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
     os.writeKeyword("order") << order_ << token::END_STATEMENT << nl;
     os.writeKeyword("source") << source_ << token::END_STATEMENT << nl;
-    os.writeKeyword("parametrization") << parametrization_ << token::END_STATEMENT << nl;
+    switch (parametrization_)
+    {
+    case RADIAL:
+        os.writeKeyword("parametrization") << "radial" << token::END_STATEMENT << nl;
+        break;
+    case AXIAL:
+        os.writeKeyword("parametrization") << "axial" << token::END_STATEMENT << nl;
+        break;
+    default:
+        break;
+    }
+
 #if (OPENFOAM >= 1812)
     this->writeEntry("value", os);
 #else

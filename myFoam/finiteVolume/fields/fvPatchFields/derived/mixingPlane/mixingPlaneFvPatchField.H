@@ -96,6 +96,13 @@ private:
     
     Type fromXRTheta(const Type& data, const vector& rDir) const;
     
+    //- Options for parametrization
+    enum parametrizationType
+    {
+        RADIAL, //!< "Quantities are expressed as functions of distance from axis"
+        AXIAL   //!< "Quantities are expressed as functions of axial position"
+    };
+
 protected:
 
     // Protected data
@@ -113,7 +120,7 @@ protected:
     const word source_;
 
     //- Parametrization (axial/radial)
-    const word parametrization_;
+    enum parametrizationType parametrization_;
 
 public:
 
