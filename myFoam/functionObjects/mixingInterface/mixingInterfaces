@@ -1,0 +1,32 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |  
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      mixingInterface;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+mixingInterfaceImpellerDiffuser
+{
+    // Mandatory entries (unmodifiable)
+    type           mixingInterface;
+    libs           (myFunctionObjects);
+
+
+    upstreamPatch      impeller_diffuser_mix;
+    downstreamPatch    diffuser_impeller_mix;
+    axis               (1 0 0);      // Rotation axis of the machne
+    configuration      radial;       // axial for axial machines, radial for radial machines
+    segments           10;           // Splits patches into 10 segments
+    convective         (k omega);    // Other convective scalar quantities
+    relaxation         0.5;	     // Relaxation coefficient 
+}
+

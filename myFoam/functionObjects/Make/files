@@ -1,0 +1,3 @@
+mixingInterface/mixingInterface.C
+
+LIB = $(FOAM_USER_LIBBIN)/libmyFunctionObjects

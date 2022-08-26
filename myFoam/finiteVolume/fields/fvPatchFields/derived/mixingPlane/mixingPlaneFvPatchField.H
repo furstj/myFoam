@@ -96,16 +96,17 @@ private:
     
     Type fromXRTheta(const Type& data, const vector& rDir) const;
     
+
+protected:
+
+    // Protected data
+
     //- Options for parametrization
     enum parametrizationType
     {
         RADIAL, //!< "Quantities are expressed as functions of distance from axis"
         AXIAL   //!< "Quantities are expressed as functions of axial position"
     };
-
-protected:
-
-    // Protected data
 
     //- origin (a point at the axis of rotation)
     const vector origin_;

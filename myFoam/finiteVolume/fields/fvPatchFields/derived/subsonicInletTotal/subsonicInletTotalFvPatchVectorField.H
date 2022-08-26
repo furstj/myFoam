@@ -175,6 +175,15 @@ public:
                 return TName_;
             }
 
+            const vectorField& inletDirection() const
+            {
+		return inletDir_;
+            }
+
+	    vectorField& inletDirection() 
+            {
+                return inletDir_;
+            }
 
         // Mapping functions
 

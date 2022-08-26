@@ -38,9 +38,7 @@
     // Bound density
     boundMinMax(rho, rhoMin, rhoMax);
 
-    // Update boundary field of U and rhoU 
-    U.correctBoundaryConditions();
-    MRF.correctBoundaryVelocity(U);
+    // Update boundary field of rhoU 
     rhoU.boundaryFieldRef() = rho.boundaryField()*U.boundaryField();
 
     // Update boundary field of rhoE

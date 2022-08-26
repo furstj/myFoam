@@ -261,7 +261,9 @@ void Foam::mixingPlaneFvPatchField<Type>::write(Ostream& os) const
 
 
 // Specializations of to/from XRTheta
+// Note: any class derived from mixing plane has to define mixingPlaneDerivedFvPatchField
 
+#ifndef mixingPlaneDerivedFvPatchField
 namespace Foam {
 
 template<class Type>
@@ -307,5 +309,6 @@ vector mixingPlaneFvPatchField<vector>::fromXRTheta(const vector& data, const ve
 }
 
 }
+#endif
 
 // ************************************************************************* //
