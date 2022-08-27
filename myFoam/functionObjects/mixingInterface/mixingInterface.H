@@ -74,6 +74,7 @@ Usage
       segments        | Number of segments for mixing | label  |  yes  | 10
       convective      | Other convective quantities   | wordList |  no  | -
       relaxation      | Relaxation parameter          | scalar | no    | 1
+      frequency       | Frequency of mixing update    | label  | no    | 1
     \endtable
 
     Options for the \c configuration entry:
@@ -167,6 +168,9 @@ class mixingInterface
 
     //- Relaxation parameter (new BC value = (1-relax)*OLD + relax*NEW)
     scalar relax_;
+
+    //- Frequency of updates
+    label frequency_;
     
     //- Parameter bins
     scalarList paramBins_;
@@ -177,7 +181,9 @@ class mixingInterface
     //- ID of the upstream patch
     const label downstreamPatchID_;
 
-
+    //- Iteration number
+    label counter_;
+    
     // Private member functions
 
     //- Cast reference of objectRegistry to fvMesh
@@ -200,6 +206,8 @@ class mixingInterface
     scalar interpolateScalar(const List<scalar>& y, scalar p) const;
 
     vector interpolateVector(const List<vector>& y, scalar p) const;
+
+    label getBin(scalar p) const;
     
 public:
 

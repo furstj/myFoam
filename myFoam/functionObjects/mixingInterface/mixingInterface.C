@@ -72,8 +72,10 @@ Foam::functionObjects::mixingInterface::mixingInterface
     segments_(dict.getOrDefault<label>("segments", 10)),
     convectiveVariables_(dict.getOrDefault<wordList>("convective", wordList())),
     relax_(dict.getOrDefault<scalar>("relaxation", 1.0)),
+    frequency_(dict.getOrDefault<label>("frequency", 1)),
     upstreamPatchID_(mesh().boundaryMesh().findPatchID(upstreamPatch_)),
-    downstreamPatchID_(mesh().boundaryMesh().findPatchID(downstreamPatch_))
+    downstreamPatchID_(mesh().boundaryMesh().findPatchID(downstreamPatch_)),
+    counter_(Zero)
 {
     Info << "MIXINGINTERFACE CONSTRUCTOR" << endl;
     read(dict);
@@ -141,7 +143,8 @@ Foam::functionObjects::mixingInterface::mixingInterface
     paramBins_.resize(segments_ + 1);
     for (label i=0; i<=segments_; i++)
     {
-        paramBins_[i] = parMin + i*(parMax - parMin)/segments_;
+        scalar xi = -M_PI/2 + M_PI*scalar(i)/segments_;
+        paramBins_[i] = parMin + (parMax - parMin)*(sin(xi)+1)/2;
         Info << paramBins_[i] << nl;
     }
 
@@ -158,21 +161,25 @@ bool Foam::functionObjects::mixingInterface::read(const dictionary& dict)
 
 bool Foam::functionObjects::mixingInterface::execute()
 {
-    Info << "MIXING INTERFACE EXECUTE" << nl;
+    counter_++;
+    
+    if (counter_ % frequency_ != 0) return true;
+    
+    Info << "MIXING INTERFACE EXECUTE" << nl << nl;;
 
     const volScalarField& p  = mesh().lookupObject<volScalarField>(word("p"));
     const volScalarField& T  = mesh().lookupObject<volScalarField>(word("T"));
     const volVectorField& U  = mesh().lookupObject<volVectorField>(word("U"));
 
-    const fvPatchScalarField& pUp = p.boundaryField()[upstreamPatchID_];
-    const fvPatchScalarField& TUp = T.boundaryField()[upstreamPatchID_];
-    const fvPatchVectorField& UUp = U.boundaryField()[upstreamPatchID_];
+    const scalarField& pUp = p.boundaryField()[upstreamPatchID_];
+    const scalarField& TUp = T.boundaryField()[upstreamPatchID_];
+    const vectorField& UUp = U.boundaryField()[upstreamPatchID_];
 
-    const fvPatchScalarField& pDn = p.boundaryField()[downstreamPatchID_];
+    const scalarField& pDn = p.boundaryField()[downstreamPatchID_];
 
     const auto& thermo =
         mesh().lookupObject<psiThermo>("thermophysicalProperties");
-    label cellI = pUp.patch().faceCells()[0];
+    label cellI = p.boundaryField()[upstreamPatchID_].patch().faceCells()[0];
     scalar Cp = thermo.Cp()()[cellI];
     scalar Cv = thermo.Cv()()[cellI];
     scalar R = Cp - Cv;
@@ -266,7 +273,7 @@ bool Foam::functionObjects::mixingInterface::execute()
     }
 
 
-    // Static pressure to upstream
+    // Static pressure to upstream (using mean values)
     {
         List<scalar> pAvgDn = getScalarAverages(
             pDn,
@@ -277,12 +284,25 @@ bool Foam::functionObjects::mixingInterface::execute()
         volScalarField::Boundary& pb =
             const_cast<volScalarField*>(&p)->boundaryFieldRef();
 
-        fixedValueFvPatchScalarField& pT =
+        fixedValueFvPatchScalarField& pp =
             refCast<fixedValueFvPatchScalarField>(pb[upstreamPatchID_]);
-        forAll(pT, i)
+
+        // Extrapolate intrnal pressure 
+        pp.operator=(pp.patchInternalField());
+        
+        List<scalar> pAvgUp = getScalarAverages(
+            pUp,
+            mesh().magSf().boundaryField()[upstreamPatchID_],
+            mesh().Cf().boundaryField()[upstreamPatchID_]
+        );
+
+        List<scalar> dp = pAvgDn - pAvgUp;
+        
+        forAll(pp, i)
         {
             vector x = mesh().Cf().boundaryField()[upstreamPatchID_][i];
-            pT[i] = (1 - relax_)*pT[i] + relax_*interpolateScalar(pAvgDn, parameter_(x));
+            //pp[i] = (1 - relax_)*pp[i] + relax_*interpolateScalar(pAvgDn, parameter_(x));
+            pp[i] += relax_*interpolateScalar(dp, parameter_(x));
         }
     }
 
@@ -346,8 +366,7 @@ Foam::List<scalar>  Foam::functionObjects::mixingInterface::getScalarAverages(
     {
         scalar par = parameter_(coords[i]);
         
-        label bin = int((par - paramBins_[0])*segments_/(paramBins_[segments_] - paramBins_[0]));
-        bin = max(0, min(bin, segments_-1));
+        label bin = getBin(par);
         averages[bin] += weights[i]*values[i];
         w[bin] += weights[i];
     }
@@ -393,15 +412,20 @@ Foam::List<vector>  Foam::functionObjects::mixingInterface::getVectorAverages(
     return averages;
 }
 
+Foam::label Foam::functionObjects::mixingInterface::getBin(scalar p) const
+{
+    label i;
+    for (i=1; i<=segments_; i++)
+        if (p < paramBins_[i]) break;
+    return i-1;
+}
 
 Foam::scalar Foam::functionObjects::mixingInterface::interpolateScalar(
     const List<scalar>& y,
     scalar p
 ) const
 {
-    label bin = int((p - paramBins_[0])*segments_/(paramBins_[segments_] - paramBins_[0]));
-    bin = max(0, min(bin, segments_-1));
-    return y[bin];
+    return y[getBin(p)];
 }
 
 Foam::vector Foam::functionObjects::mixingInterface::interpolateVector(
@@ -409,9 +433,7 @@ Foam::vector Foam::functionObjects::mixingInterface::interpolateVector(
     scalar p
 ) const
 {
-    label bin = int((p - paramBins_[0])*segments_/(paramBins_[segments_] - paramBins_[0]));
-    bin = max(0, min(bin, segments_-1));
-    return y[bin];
+    return y[getBin(p)];
 }
 
 
