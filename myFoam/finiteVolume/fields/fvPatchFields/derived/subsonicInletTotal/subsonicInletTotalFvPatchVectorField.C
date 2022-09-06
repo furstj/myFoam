@@ -232,7 +232,7 @@ void Foam::subsonicInletTotalFvPatchVectorField::updateCoeffs()
         scalar ub = 2*cb/(gamma-1) + Rm;
         scalar uMag = ub * oneByCos;
         refValue[faceI] = dir*uMag;
-        valFraction[faceI] = pos(ub);
+        valFraction[faceI] = pos0(ub);
     }
     
     mixedFvPatchVectorField::updateCoeffs();
