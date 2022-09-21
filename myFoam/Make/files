@@ -13,6 +13,7 @@ $(bocos)/mixingPlane/mixingPlaneFvPatchFields.C
 $(bocos)/subsonicOutletVelocity/subsonicOutletVelocityFvPatchVectorField.C
 $(bocos)/subsonicOutletTemperature/subsonicOutletTemperatureFvPatchScalarField.C
 $(bocos)/blendedMean/blendedMeanFvPatchFields.C
+$(bocos)/myPressureDirectedInletVelocity/myPressureDirectedInletVelocityFvPatchVectorField.C
 
 ddtSchemes = finiteVolume/finiteVolume/ddtSchemes
 

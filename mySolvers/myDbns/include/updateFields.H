@@ -1,4 +1,7 @@
 {
+    // Estimate the bdensity at the boundary using "zeroGradient"
+    rho.boundaryFieldRef() = thermo.rho()().boundaryField();
+
     // Compute U
     U = rhoU/rho;
     U.correctBoundaryConditions();
