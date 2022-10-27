@@ -35,12 +35,13 @@ Foam::numericFlux::numericFlux
     const volScalarField& p,
     const volVectorField& U,
     const volScalarField& T,
-    basicThermo& thermo,
+    fluidThermo& thermo,
     const MRFZoneList& MRF
 )
 :
     pFlux_( Foam::dbnsFlux::New( 
-        p.mesh(), 
+        p.mesh(),
+        thermo,
         p.mesh().thisDb().lookupObject<IOdictionary>("fvSchemes")) 
     ),
     mesh_(p.mesh()),

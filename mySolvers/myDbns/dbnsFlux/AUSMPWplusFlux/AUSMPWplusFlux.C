@@ -34,7 +34,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::AUSMPWplusFlux::AUSMPWplusFlux(const fvMesh&, const dictionary& dict)
+Foam::AUSMPWplusFlux::AUSMPWplusFlux(const fvMesh&, const fluidThermo& thermo, const dictionary& dict):
+    dbnsFlux(thermo)
 {
     dictionary mySubDict( dict.subOrEmptyDict("AUSMPWplusFluxCoeffs") );
     alpha_ = mySubDict.lookupOrAddDefault("alpha", 3.0/16.0);

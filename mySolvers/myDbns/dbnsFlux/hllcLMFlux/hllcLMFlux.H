@@ -71,7 +71,9 @@ public:
     // Constructors
 
     //- Constructor null
-  hllcLMFlux(const fvMesh&, const dictionary&) {};
+    hllcLMFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&):
+        dbnsFlux(thermo)
+        {};
 
 
     // Destructor - default

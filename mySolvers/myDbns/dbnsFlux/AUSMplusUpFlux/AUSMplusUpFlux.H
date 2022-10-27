@@ -66,7 +66,7 @@ public:
     // Constructors
 
     //- Constructor 
-    AUSMplusUpFlux(const fvMesh&, const dictionary&);
+    AUSMplusUpFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&);
 
 
     // Destructor - default

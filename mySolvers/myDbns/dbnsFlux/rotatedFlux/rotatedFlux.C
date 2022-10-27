@@ -33,13 +33,14 @@ namespace Foam
 }
 
 // * * * * * * * * * * * * * * * Constructor  * * * * * * * * * * * * * //
-Foam::rotatedFlux::rotatedFlux(const fvMesh& mesh, const dictionary& dict)
+Foam::rotatedFlux::rotatedFlux(const fvMesh& mesh, const fluidThermo& thermo, const dictionary& dict):
+    dbnsFlux(thermo)
 {
     dictionary subDict( dict.subDict("rotatedFluxCoeffs") );
     epsilon_ = subDict.lookupOrAddDefault("epsilon", 1e-3);
 
-    diffusiveFlux_ = Foam::dbnsFlux::New(mesh, subDict, "diffusiveFlux");
-    lowDiffusionFlux_ = Foam::dbnsFlux::New(mesh, subDict, "lowDiffusionFlux");
+    diffusiveFlux_ = Foam::dbnsFlux::New(mesh, thermo, subDict, "diffusiveFlux");
+    lowDiffusionFlux_ = Foam::dbnsFlux::New(mesh, thermo, subDict, "lowDiffusionFlux");
 }
 
 

@@ -1,0 +1,16 @@
+EXE_INC = \
+    -I./specie/equationOfState/AungierRedlichKwongGas \
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/thermophysicalProperties/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude
+
+LIB_LIBS = \
+    -lfluidThermophysicalModels \
+    -lcompressibleTransportModels \
+    -lspecie \
+    -lthermophysicalProperties \
+    -lfiniteVolume \
+    -lmeshTools

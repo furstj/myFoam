@@ -151,7 +151,7 @@ public:
         const volScalarField& p,
         const volVectorField& U,
         const volScalarField& T,
-        basicThermo& thermo,
+        fluidThermo& thermo,
         const MRFZoneList& MRF
     );
     

@@ -60,7 +60,8 @@ public:
     // Constructors
 
     //- Construct null
-    roeFlux(const fvMesh&, const dictionary&)
+    roeFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&):
+        dbnsFlux(thermo)
         {}
     
     

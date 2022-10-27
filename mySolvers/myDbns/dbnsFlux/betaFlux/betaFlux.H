@@ -60,7 +60,9 @@ public:
     // Constructors
     
     //- Construct null
-    betaFlux(const fvMesh&, const dictionary&) {}
+    betaFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&):
+        dbnsFlux(thermo)
+        {}
     
     // Destructor - default
     virtual ~betaFlux() {}

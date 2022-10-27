@@ -62,7 +62,8 @@ public:
     // Constructors
 
     //- Construct null
-    rusanovFlux(const fvMesh&, const dictionary&)
+    rusanovFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&):
+        dbnsFlux(thermo)
         {}
     
 

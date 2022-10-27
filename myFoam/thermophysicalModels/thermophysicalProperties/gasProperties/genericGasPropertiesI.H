@@ -1,0 +1,220 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Copyright (C) 2019 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+namespace Foam
+{
+
+
+template<typename TransportModel>
+genericGasProperties<TransportModel>::genericGasProperties(const dictionary& dict):
+    //gasProperties(dict),
+    transport_(dict.subDict("mixture"))
+{
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::W() const
+{
+    return transport_.W();
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::R() const
+{
+    return transport_.R();
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::rho(scalar p, scalar T) const
+{
+    return transport_.rho(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Z(scalar p, scalar T) const
+{
+    return transport_.Z(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::psi(scalar p, scalar T) const
+{
+    return transport_.psi(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::CpMCv(scalar p, scalar T) const
+{
+    return transport_.CpMCv(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Cp(scalar p, scalar T) const
+{
+    return transport_.Cp(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Cv(scalar p, scalar T) const
+{
+    return transport_.Cv(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Ha(scalar p, scalar T) const
+{
+    return transport_.Ha(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Hs(scalar p, scalar T) const
+{
+    return transport_.Hs(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Hc() const
+{
+    return transport_.Hc();
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Ea(scalar p, scalar T) const
+{
+    return transport_.Ea(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::Es(scalar p, scalar T) const
+{
+    return transport_.Es(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::S(scalar p, scalar T) const
+{
+    return transport_.S(p,T);
+}
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::beta_p(scalar p, scalar T) const
+{
+    scalar v  = 1/rho(p,T);
+    scalar T1 = (1 + 1.e-6)*T;
+    scalar v1 = 1/rho(p,T1);
+    return 1/v*(v1 - v)/(T1 - T);
+}
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::beta_T(scalar p, scalar T) const
+{
+    scalar v  = 1/rho(p,T);
+    scalar p1 = (1 + 1e-6)*p;
+    scalar v1 = 1/rho(p1,T);    
+    return -1/v*(v1 - v)/(p1 - p);
+}
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::c(scalar p, scalar T) const
+{
+    scalar v = 1/rho(p,T);
+    scalar cp = Cp(p,T);
+    return sqrt( cp*v/(cp*beta_T(p,T) - T*v*sqr(beta_p(p,T))) );
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::THs(const scalar Hs, const scalar p, const scalar T0)
+    const
+{
+    return transport_.THs(Hs, p, T0);
+}
+    
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::THa(const scalar Ha, const scalar p, const scalar T0)
+    const
+{
+    return transport_.THa(Ha, p, T0);
+}
+    
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::TEs(const scalar Es, const scalar p, const scalar T0)
+    const
+{
+    return transport_.TEs(Es, p, T0);
+}
+    
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::TEa(const scalar Ea, const scalar p, const scalar T0)
+    const
+{
+    return transport_.TEa(Ea, p, T0);
+}
+    
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::mu(scalar p, scalar T) const
+{
+    return transport_.mu(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::kappa(scalar p, scalar T) const
+{
+    return transport_.kappa(p,T);
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::alphah(scalar p, scalar T) const
+{
+    return transport_.alphah(p,T);
+}
+
+template<typename TransportModel>
+void genericGasProperties<TransportModel>::writeData(Ostream& os) const
+{}
+
+}
+
+
+
+// ************************************************************************* //

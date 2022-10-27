@@ -67,8 +67,7 @@ public:
     // Constructors
 
     //- Constructor 
-    AUSMPWplusFlux(const fvMesh&, const dictionary&);
-
+    AUSMPWplusFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&);
 
     // Destructor - default
     virtual ~AUSMPWplusFlux() {};

@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
             }
 
 #           include "lusgsSweep.H"
-                        
+
             rho  += dRho;
             rhoU += dRhoU;
             rhoE += dRhoE;

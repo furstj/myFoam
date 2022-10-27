@@ -42,7 +42,7 @@ SourceFiles
 namespace Foam
 {
   defineTypeNameAndDebug(dbnsFlux, 0);
-  defineRunTimeSelectionTable(dbnsFlux,dictionary);
+  defineRunTimeSelectionTable(dbnsFlux, dictionary);
 }
 
 
@@ -51,6 +51,7 @@ namespace Foam
 Foam::autoPtr<Foam::dbnsFlux> Foam::dbnsFlux::New
 (
     const fvMesh& mesh,
+    const fluidThermo& thermo,
     const dictionary& dict,
     const word key
 )
@@ -71,7 +72,7 @@ Foam::autoPtr<Foam::dbnsFlux> Foam::dbnsFlux::New
             << exit(FatalError);
     }
 
-    return autoPtr<dbnsFlux>(cstrIter()(mesh, dict));
+    return autoPtr<dbnsFlux>(cstrIter()(mesh, thermo, dict));
 }
 
 

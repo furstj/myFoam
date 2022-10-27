@@ -1,0 +1,184 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Copyright (C) 2019 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "makeGasProperties.H"
+
+#include "specie.H"
+#include "perfectGas.H"
+#include "PengRobinsonGas.H"
+#include "hConstThermo.H"
+#include "eConstThermo.H"
+#include "janafThermo.H"
+#include "sensibleEnthalpy.H"
+#include "sensibleInternalEnergy.H"
+#include "thermo.H"
+
+#include "constTransport.H"
+#include "sutherlandTransport.H"
+
+#include "hPolynomialThermo.H"
+#include "polynomialTransport.H"
+
+
+namespace Foam
+{
+
+makeGasProperties(
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    perfectGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    perfectGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    perfectGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    PengRobinsonGas,
+    specie
+);
+
+makeGasProperties(
+    polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    PengRobinsonGas,
+    specie
+);
+
+makeGasProperties(
+    polynomialTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    PengRobinsonGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    PengRobinsonGas,
+    specie
+);
+
+// - Optimized gas properties
+
+// ---- constTransport, hConstThermo, perfectGas, sensibleEnthalpy ----
+
+template<>
+scalar genericGasProperties<
+    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::c(scalar p, scalar T) const
+{
+    scalar cp = Cp(p,T);
+    scalar gamma = cp / (cp - R());
+    return sqrt(gamma*R()*T);
+}
+
+template<>
+scalar genericGasProperties<
+    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::beta_p(scalar p, scalar T) const
+{
+    return 1/T;
+}
+
+template<>
+scalar genericGasProperties<
+    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::beta_T(scalar p, scalar T) const
+{
+    return 1/p;
+}
+
+template<>
+scalar genericGasProperties<
+    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::THs(const scalar Hs, const scalar p, const scalar T0) const
+{
+    scalar Href = this->Hs(0,0);
+    return (Hs - Href)/Cp(p,T0);
+}
+
+
+// ---- sutherlandTransport, hConstThermo, perfectGas, sensibleEnthalpy ----
+
+template<>
+scalar genericGasProperties<
+    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::c(scalar p, scalar T) const
+{
+    scalar cp = Cp(p,T);
+    scalar gamma = cp / (cp - R());
+    return sqrt(gamma*R()*T);
+}
+
+template<>
+scalar genericGasProperties<
+    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::beta_p(scalar p, scalar T) const
+{
+    return 1/T;
+}
+
+template<>
+scalar genericGasProperties<
+    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::beta_T(scalar p, scalar T) const
+{
+    return 1/p;
+}
+
+template<>
+scalar genericGasProperties<
+    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
+    >::THs(const scalar Hs, const scalar p, const scalar T0) const
+{
+    scalar Href = this->Hs(0,0);
+    return (Hs - Href)/Cp(p,T0);
+}
+
+
+}
+
+// ************************************************************************* //

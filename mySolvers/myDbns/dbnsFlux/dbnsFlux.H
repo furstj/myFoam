@@ -39,6 +39,8 @@ SourceFiles
 #define dbnsFlux_H
 
 #include "fvCFD.H"
+#include "gasProperties.H"
+#include "fluidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +57,9 @@ private:
     dbnsFlux(const dbnsFlux&);
     void operator=(const dbnsFlux&);
 
+protected:
+    autoPtr<gasProperties> gasProps_;
+    
 public:
     TypeName("dbnsFlux");
 
@@ -63,16 +68,21 @@ public:
         autoPtr,
         dbnsFlux,
         dictionary,
-        (const fvMesh& mesh, const dictionary& dict),
-        (mesh, dict)
+        (const fvMesh& mesh, const fluidThermo& thermo, const dictionary& dict),
+        (mesh, thermo, dict)
     );
 
     // Constructors
-    dbnsFlux() {};
+    dbnsFlux() = delete;
 
+    dbnsFlux(const fluidThermo& thermo):
+        gasProps_(gasProperties::New(thermo))
+    {};
+    
     //- Return a reference to the selected dbnsFlux
     static autoPtr<dbnsFlux> New(
-        const fvMesh& mesh, 
+        const fvMesh& mesh,
+        const fluidThermo& thermo,
         const dictionary& dict,
 	const word key="dbnsFlux"
     );

@@ -80,7 +80,7 @@ public:
     rotatedFlux(const rotatedFlux& ) = delete;
     
     //- Construct null
-    rotatedFlux(const fvMesh&, const dictionary&);
+    rotatedFlux(const fvMesh&, const fluidThermo& thermo, const dictionary&);
     
     // Destructor - default
     virtual ~rotatedFlux() {}
