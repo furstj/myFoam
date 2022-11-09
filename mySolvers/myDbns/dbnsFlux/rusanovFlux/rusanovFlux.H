@@ -84,10 +84,6 @@ public:
         const vector& URight,
         const scalar& TLeft,
         const scalar& TRight,
-        const scalar& RLeft,
-        const scalar& RRight,
-        const scalar& CvLeft,
-        const scalar& CvRight,
         const vector& Sf,
         const scalar& magSf,
         const scalar& meshPhi

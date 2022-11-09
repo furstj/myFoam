@@ -45,10 +45,6 @@ void Foam::betaFlux::evaluateFlux
     const vector& URight,
     const scalar& TLeft,
     const scalar& TRight,
-    const scalar& RLeft,
-    const scalar& RRight,
-    const scalar& CvLeft,
-    const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
     const scalar& meshPhi
@@ -61,19 +57,13 @@ void Foam::betaFlux::evaluateFlux
         << exit(FatalError);
     };
 
-    // Step 1: decode rho left and right:
-    scalar rhoLeft = pLeft/(RLeft*TLeft);
-    scalar rhoRight = pRight/(RRight*TRight);
+  // Step 1: decode rho left and right:
+    scalar rhoLeft  = gas().rho(pLeft, TLeft);
+    scalar rhoRight = gas().rho(pRight, TRight);
 
-    // Decode left and right total energy:
-    scalar eLeft = CvLeft*TLeft+0.5*magSqr(ULeft);
-    scalar eRight = CvRight*TRight+0.5*magSqr(URight);
-
-    // Adiabatic exponent is constant for ideal gas but if Cp=Cp(T)
-    // it must be computed for each cell and evaluated at each face
-    // through reconstruction
-    const scalar kappaLeft = (CvLeft+RLeft)/CvLeft;
-    const scalar kappaRight = (CvRight+RRight)/CvRight;
+    // Compute left and right total enthalpies:
+    const scalar hLeft = gas().Hs(pLeft, TLeft) + 0.5*magSqr(ULeft);
+    const scalar hRight = gas().Hs(pRight, TRight) + 0.5*magSqr(URight);
 
     // normal vector
     vector normalVector = Sf/magSf;
@@ -82,19 +72,9 @@ void Foam::betaFlux::evaluateFlux
     const scalar contrVLeft  = (ULeft & normalVector);
     const scalar contrVRight = (URight & normalVector);
 
-    // Compute left and right total enthalpies:
-    const scalar hLeft = eLeft + pLeft/rhoLeft;
-    const scalar hRight = eRight + pRight/rhoRight;
-
-    // Compute left and right velocity square
-    const scalar qLeftSquare  = magSqr(ULeft);
-    const scalar qRightSquare = magSqr(URight);
-
     // compute left and right speed of sound
-    const scalar cLeft =
-        sqrt(max((kappaLeft - 1)*(hLeft - 0.5*qLeftSquare), SMALL));
-    const scalar cRight =
-        sqrt(max((kappaRight - 1)*(hRight - 0.5*qRightSquare), SMALL));
+    const scalar cLeft = gas().c(pLeft, TLeft);
+    const scalar cRight = gas().c(pRight, TRight);
 
     const scalar magULeft  = mag(ULeft);
     const scalar magURight = mag(URight);
@@ -133,11 +113,11 @@ void Foam::betaFlux::evaluateFlux
     const vector UTilde = ULeft*wLeft + URight*wRight;
     const scalar hTilde = hLeft*wLeft + hRight*wRight;
     const scalar qTildeSquare = magSqr(UTilde);
-    const scalar kappaTilde = kappaLeft*wLeft + kappaRight*wRight;
 
     // Speed of sound
-    const scalar cTilde =
-        sqrt(max((kappaTilde - 1)*(hTilde - 0.5*qTildeSquare), SMALL));
+    const scalar pTilde = wLeft*pLeft + wRight*pRight;
+    const scalar TTilde = gas().THs(hTilde - 0.5*qTildeSquare, pTilde, (TLeft+TRight)/2);
+    const scalar cTilde = gas().c(pTilde, TTilde);
 
     // Roe averaged contravariant velocity
     const scalar contrVTilde = (UTilde & normalVector);

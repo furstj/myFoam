@@ -56,8 +56,6 @@ class dbnsFlux
 private:
     dbnsFlux(const dbnsFlux&);
     void operator=(const dbnsFlux&);
-
-protected:
     autoPtr<gasProperties> gasProps_;
     
 public:
@@ -104,14 +102,15 @@ public:
             const vector& URight,
             const scalar& TLeft,
             const scalar& TRight,
-            const scalar& RLeft,
-            const scalar& RRight,
-            const scalar& CvLeft,
-            const scalar& CvRight,
             const vector& Sf,
             const scalar& magSf,
 	    const scalar& meshPhi
         ) const = 0;
+
+    const gasProperties& gas() const
+        {
+            return *gasProps_;
+        }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

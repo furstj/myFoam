@@ -57,10 +57,6 @@ void Foam::rotatedFlux::evaluateFlux
     const vector& URight,
     const scalar& TLeft,
     const scalar& TRight,
-    const scalar& RLeft,
-    const scalar& RRight,
-    const scalar& CvLeft,
-    const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
     const scalar& meshPhi
@@ -87,14 +83,14 @@ void Foam::rotatedFlux::evaluateFlux
       if ( (n1 & n) < 0) n1 *= -1;
       
       diffusiveFlux_->evaluateFlux(rhoFlux1, rhoUFlux1, rhoEFlux1, 
-      pLeft, pRight, ULeft, URight, TLeft, TRight, RLeft, RRight, CvLeft, CvRight,
+      pLeft, pRight, ULeft, URight, TLeft, TRight,
       n1*magSf, magSf, meshPhi);
 
       vector n2 = (n1^n)^n1;
       n2 /= mag(n2);
 
       lowDiffusionFlux_->evaluateFlux(rhoFlux2, rhoUFlux2, rhoEFlux2, 
-      pLeft, pRight, ULeft, URight, TLeft, TRight, RLeft, RRight, CvLeft, CvRight,
+      pLeft, pRight, ULeft, URight, TLeft, TRight,
       n2*magSf, magSf, meshPhi);
 
       const scalar alpha1 = n & n1;
@@ -108,7 +104,7 @@ void Foam::rotatedFlux::evaluateFlux
   {
       // According to Nishikawa, n1 is othogonal to n (i.e. alpha1=0)
       lowDiffusionFlux_->evaluateFlux(rhoFlux, rhoUFlux, rhoEFlux, 
-      pLeft, pRight, ULeft, URight, TLeft, TRight, RLeft, RRight, CvLeft, CvRight,
+      pLeft, pRight, ULeft, URight, TLeft, TRight,
       Sf, magSf, meshPhi);
   }
   

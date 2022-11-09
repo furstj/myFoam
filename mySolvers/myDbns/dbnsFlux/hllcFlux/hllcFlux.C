@@ -45,10 +45,6 @@ void Foam::hllcFlux::evaluateFlux
     const vector& URight,
     const scalar& TLeft,
     const scalar& TRight,
-    const scalar& RLeft,
-    const scalar& RRight,
-    const scalar& CvLeft,
-    const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
     const scalar& meshPhi
@@ -70,16 +66,16 @@ void Foam::hllcFlux::evaluateFlux
     // Compute conservative variables assuming perfect gas law
 
     // Density
-    const scalar rhoLeft = gasProps_->rho(pLeft, TLeft);
-    const scalar rhoRight = gasProps_->rho(pRight, TRight);
+    const scalar rhoLeft = gas().rho(pLeft, TLeft);
+    const scalar rhoRight = gas().rho(pRight, TRight);
 
     // DensityVelocity
     const vector rhoULeft = rhoLeft*ULeft;
     const vector rhoURight = rhoRight*URight;
 
     // Compute left and right total enthalpies:
-    const scalar HLeft = gasProps_->Hs(pLeft, TLeft) + 0.5*magSqr(ULeft);
-    const scalar HRight = gasProps_->Hs(pRight, TRight) + 0.5*magSqr(URight);
+    const scalar HLeft = gas().Hs(pLeft, TLeft) + 0.5*magSqr(ULeft);
+    const scalar HRight = gas().Hs(pRight, TRight) + 0.5*magSqr(URight);
 
     // DensityTotalEnergy
     const scalar rhoELeft = rhoLeft*HLeft - pLeft;
@@ -90,10 +86,9 @@ void Foam::hllcFlux::evaluateFlux
     const scalar qLeft = (ULeft & normalVector) - qMesh;
     const scalar qRight = (URight & normalVector) - qMesh;
 
-    // Speed of sound, for left and right side, assuming perfect gas
-    const scalar aLeft = gasProps_->c(pLeft, TLeft);
-    
-    const scalar aRight = gasProps_->c(pRight, TRight);
+    // Speed of sound, for left and right side
+    const scalar aLeft = gas().c(pLeft, TLeft);    
+    const scalar aRight = gas().c(pRight, TRight);
 
 
     // Step 2:
@@ -123,9 +118,9 @@ void Foam::hllcFlux::evaluateFlux
     // Roe averaged pressure (?)
     const scalar pTilde = wLeft*pLeft + wRight*pRight;
 
-    const scalar TTilde = gasProps_->THs(hTilde, pTilde, (TLeft+TRight)/2);
+    const scalar TTilde = gas().THs(hTilde, pTilde, (TLeft+TRight)/2);
     
-    const scalar aTilde = gasProps_->c(pTilde, TTilde);
+    const scalar aTilde = gas().c(pTilde, TTilde);
 
     // Step 3: compute signal speeds for face:
     const scalar SLeft  = min(qLeft - aLeft, contrUTilde - qMesh - aTilde);

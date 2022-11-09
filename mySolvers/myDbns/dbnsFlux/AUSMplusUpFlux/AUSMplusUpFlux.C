@@ -60,10 +60,6 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     const vector& URight,
     const scalar& TLeft,
     const scalar& TRight,
-    const scalar& RLeft,
-    const scalar& RRight,
-    const scalar& CvLeft,
-    const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
     const scalar& meshPhi
@@ -75,18 +71,13 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     
     const scalar qMesh = meshPhi / magSf;
 
-    // Ratio of specific heat capacities
-    const scalar kappaLeft = (RLeft + CvLeft)/CvLeft;
-    const scalar kappaRight = (RRight + CvRight)/CvRight;
-    const scalar kappa = 0.5 * (kappaLeft + kappaRight);
-
     // Density
-    const scalar rhoLeft = pLeft/(RLeft*TLeft);
-    const scalar rhoRight = pRight/(RRight*TRight);
+    const scalar rhoLeft = gas().rho(pLeft, TLeft);
+    const scalar rhoRight = gas().rho(pRight, TRight);
 
     // DensityTotalEnthalpy
-    const scalar rhoHLeft  = rhoLeft*(CvLeft*TLeft + 0.5*magSqr(ULeft)) + pLeft;
-    const scalar rhoHRight = rhoRight*(CvRight*TRight + 0.5*magSqr(URight)) + pRight;
+    const scalar rhoHLeft  = rhoLeft*gas().Hs(pLeft, TLeft) + pLeft;
+    const scalar rhoHRight = rhoRight*gas().Hs(pRight, TRight) + pRight;
 
     // DensityVelocity
     const vector rhoULeft = rhoLeft*ULeft;
@@ -97,8 +88,20 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     const scalar qRight = (URight & normalVector) - qMesh;
 
     const scalar Ht = 0.5*(rhoHLeft/rhoLeft + rhoHRight/rhoRight);
+
+    // Compute sonic parameters by solving h(p,T) + 0.5c^2(p,T) = H
+    const scalar pStar = (pLeft + pRight)/2;
+    scalar TStar = (TLeft + TRight)/2;
+    for (label iter=0; iter<2; iter++)  // TODO: more iterations for real gas!
+    {
+        scalar Cp = gas().Cp(pStar, TStar);
+        scalar Cv = Cp - gas().CpMCv(pStar, TStar);
+        scalar f = gas().Hs(pStar, TStar) + 0.5*sqr(gas().c(pStar,TStar)) - Ht;
+        scalar fPrime = 0.5*(Cp/Cv+1)*Cp;
+        TStar -= f/fPrime;
+    }
     
-    const scalar aStar = sqrt(2.0*(kappa-1)/(kappa+1) * Ht);
+    const scalar aStar = gas().c(pStar, TStar);
     const scalar aHatLeft  = sqr(aStar) / max(aStar, qLeft);
     const scalar aHatRight = sqr(aStar) / max(aStar, -qRight);
     const scalar aTilde = min(aHatLeft, aHatRight);

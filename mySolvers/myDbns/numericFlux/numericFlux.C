@@ -95,7 +95,6 @@ void Foam::numericFlux::computeFlux()
 {
     // Get face-to-cell addressing: face area point from owner to neighbour
     const auto& owner = mesh_.owner();
-    const auto& neighbour = mesh_.neighbour();
 
     // Get the face area vector
     const surfaceVectorField& Sf = mesh_.Sf();
@@ -104,10 +103,6 @@ void Foam::numericFlux::computeFlux()
     // ALE mesh velocity + velocity due to MRF
     surfaceScalarField mshPhi( meshPhi() ); 
     MRF_.makeAbsolute(mshPhi);
-
-    // Thermodynamics
-    const volScalarField Cv = thermo_.Cv();
-    const volScalarField R  = thermo_.Cp() - Cv;
 
     surfaceScalarField pos_(IOobject("pos", mesh_), mesh_, dimensionedScalar("one", dimless, 1.0));
     surfaceScalarField neg_(IOobject("neg", mesh_), mesh_, dimensionedScalar("minusOne", dimless, -1.0));
@@ -124,9 +119,6 @@ void Foam::numericFlux::computeFlux()
     // Calculate fluxes at internal faces
     forAll (owner, faceI)
     {
-        const label own = owner[faceI];
-        const label nei = neighbour[faceI];
-
         // calculate fluxes with reconstructed primitive variables at faces
 	pFlux_ -> evaluateFlux
         (
@@ -136,8 +128,6 @@ void Foam::numericFlux::computeFlux()
             p_pos[faceI],  p_neg[faceI],
             U_pos[faceI],  U_neg[faceI],
             T_pos[faceI],  T_neg[faceI],
-            R[own],        R[nei],
-            Cv[own],       Cv[nei],
             Sf[faceI],
             magSf[faceI],
 	    mshPhi[faceI]
@@ -153,9 +143,6 @@ void Foam::numericFlux::computeFlux()
         fvsPatchScalarField& pRhoFlux  = rhoFlux_.boundaryFieldRef()[patchi];
         fvsPatchVectorField& pRhoUFlux = rhoUFlux_.boundaryFieldRef()[patchi];
         fvsPatchScalarField& pRhoEFlux = rhoEFlux_.boundaryFieldRef()[patchi];
-
-        const scalarField& pCv = Cv.boundaryField()[patchi];
-        const scalarField& pR  = R.boundaryField()[patchi];
 
         // Face areas
         const fvsPatchVectorField& pSf = Sf.boundaryField()[patchi];
@@ -185,8 +172,6 @@ void Foam::numericFlux::computeFlux()
                     pU_pos[facei],  pU_neg[facei],
                     pT_pos[facei],  pT_neg[facei],
 
-                    pR[facei],  pR[facei],
-                    pCv[facei], pCv[facei],
                     pSf[facei],
                     pMagSf[facei],
                     pMshPhi[facei]
@@ -210,8 +195,6 @@ void Foam::numericFlux::computeFlux()
                     pp[facei],  pp[facei],
                     pU[facei],  pU[facei],
                     pT[facei],  pT[facei],
-                    pR[facei],  pR[facei],
-                    pCv[facei], pCv[facei],
                     pSf[facei],
                     pMagSf[facei],
 		    pMshPhi[facei]

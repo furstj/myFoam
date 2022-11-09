@@ -57,10 +57,6 @@ void Foam::AUSMPWplusFlux::evaluateFlux
     const vector& URight,
     const scalar& TLeft,
     const scalar& TRight,
-    const scalar& RLeft,
-    const scalar& RRight,
-    const scalar& CvLeft,
-    const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
     const scalar& meshPhi
@@ -72,25 +68,32 @@ void Foam::AUSMPWplusFlux::evaluateFlux
     
     const scalar qMesh = meshPhi / magSf;
 
-    // Ratio of specific heat capacities
-    const scalar kappaLeft = (RLeft + CvLeft)/CvLeft;
-    const scalar kappaRight = (RRight + CvRight)/CvRight;
-    const scalar kappa = 0.5 * (kappaLeft + kappaRight);
-
     // Density
-    const scalar rhoLeft = pLeft/(RLeft*TLeft);
-    const scalar rhoRight = pRight/(RRight*TRight);
+    const scalar rhoLeft = gas().rho(pLeft, TLeft);
+    const scalar rhoRight = gas().rho(pRight, TRight);
 
     // Normal velocity (including mesh movement)
     const scalar qLeft = (ULeft & normalVector) - qMesh;
     const scalar qRight = (URight & normalVector) - qMesh;
     
     // "normal" total enthalpy
-    const scalar HnLeft  = CvLeft*TLeft + pLeft/rhoLeft + 0.5*sqr(qLeft);
-    const scalar HnRight = CvRight*TRight + pRight/rhoRight + 0.5*sqr(qRight);
+    const scalar HnLeft  = gas().Hs(pLeft, TLeft) + 0.5*sqr(qLeft);
+    const scalar HnRight = gas().Hs(pRight, TRight) + 0.5*sqr(qRight);
     const scalar Hn = (HnLeft + HnRight) / 2.0;
     
-    const scalar aStar = sqrt(2.0*(kappa-1)/(kappa+1) * Hn);
+    // Compute sonic parameters by solving h(p,T) + 0.5c^2(p,T) = H
+    const scalar pStar = (pLeft + pRight)/2;
+    scalar TStar = (TLeft + TRight)/2;
+    for (label iter=0; iter<2; iter++)  // TODO: more iterations for real gas!
+    {
+        scalar Cp = gas().Cp(pStar, TStar);
+        scalar Cv = Cp - gas().CpMCv(pStar, TStar);
+        scalar f = gas().Hs(pStar, TStar) + 0.5*sqr(gas().c(pStar,TStar)) - Hn;
+        scalar fPrime = 0.5*(Cp/Cv+1)*Cp;
+        TStar -= f/fPrime;
+    }
+    const scalar aStar = gas().c(pStar, TStar);
+
     const scalar af = (qLeft +  qRight > 0 ?
                        sqr(aStar)/max(fabs(qLeft), aStar) :
                        sqr(aStar)/max(fabs(qRight), aStar) );
@@ -151,8 +154,8 @@ void Foam::AUSMPWplusFlux::evaluateFlux
         Mlp *= aw * (1+afl);
     }
 
-    const scalar rhoHLeft  = rhoLeft*(CvLeft*TLeft + 0.5*magSqr(ULeft)) + pLeft;
-    const scalar rhoHRight = rhoRight*(CvRight*TRight + 0.5*magSqr(URight)) + pRight;
+    const scalar rhoHLeft  = rhoLeft*(gas().Hs(pLeft, TLeft) + 0.5*magSqr(ULeft));
+    const scalar rhoHRight = rhoRight*(gas().Hs(pRight, TRight) + 0.5*magSqr(URight));
     
     rhoFlux  = magSf*af*(Mlp*rhoLeft + Mrm*rhoRight);
     rhoUFlux = magSf*af*(Mlp*rhoLeft*ULeft + Mrm*rhoRight*URight) + pf*Sf;

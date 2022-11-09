@@ -45,10 +45,6 @@ void Foam::hllLMFlux::evaluateFlux
     const vector& URight,
     const scalar& TLeft,
     const scalar& TRight,
-    const scalar& RLeft,
-    const scalar& RRight,
-    const scalar& CvLeft,
-    const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
     const scalar& meshPhi
@@ -67,38 +63,32 @@ void Foam::hllLMFlux::evaluateFlux
     
     const scalar qMesh = meshPhi / magSf;
 
-    // Ratio of specific heat capacities
-    const scalar kappaLeft = (RLeft + CvLeft)/CvLeft;
-    const scalar kappaRight = (RRight + CvRight)/CvRight;
-
-    // Compute conservative variables assuming perfect gas law
+    // Compute conservative variables 
 
     // Density
-    const scalar rhoLeft = pLeft/(RLeft*TLeft);
-    const scalar rhoRight = pRight/(RRight*TRight);
+    const scalar rhoLeft = gas().rho(pLeft, TLeft);
+    const scalar rhoRight = gas().rho(pRight, TRight);
 
     // DensityVelocity
     const vector rhoULeft = rhoLeft*ULeft;
     const vector rhoURight = rhoRight*URight;
 
-    // DensityTotalEnergy
-    const scalar rhoELeft = rhoLeft*(CvLeft*TLeft+0.5*magSqr(ULeft));
-    const scalar rhoERight = rhoRight*(CvRight*TRight+0.5*magSqr(URight));
-
     // Compute left and right total enthalpies:
-    const scalar HLeft = (rhoELeft + pLeft)/rhoLeft;
-    const scalar HRight = (rhoERight + pRight)/rhoRight;
+    const scalar HLeft = gas().Hs(pLeft, TLeft) + 0.5*magSqr(ULeft);
+    const scalar HRight = gas().Hs(pRight, TRight) + 0.5*magSqr(URight);
+
+    // DensityTotalEnergy
+    const scalar rhoELeft = rhoLeft*HLeft - pLeft;
+    const scalar rhoERight = rhoRight*HRight - pRight;
+
 
     // Compute qLeft and qRight (q_{l,r} = U_{l,r} \bullet n)
     const scalar qLeft = (ULeft & normalVector) - qMesh;
     const scalar qRight = (URight & normalVector) - qMesh;
 
-    // Speed of sound, for left and right side, assuming perfect gas
-    const scalar aLeft =
-        Foam::sqrt(max(0.0,kappaLeft * pLeft/rhoLeft));
-
-    const scalar aRight =
-        Foam::sqrt(max(0.0,kappaRight * pRight/rhoRight));
+    // Speed of sound, for left and right side
+    const scalar aLeft  = Foam::sqrt(max(0.0, gas().c(pLeft, TLeft)));
+    const scalar aRight = Foam::sqrt(max(0.0, gas().c(pRight, TRight)));
 
     // Step 2:
     // needs rho_{l,r}, U_{l,r}, H_{l,r}, kappa_{l,r}, Gamma_{l,r}, q_{l,r}
@@ -121,14 +111,10 @@ void Foam::hllLMFlux::evaluateFlux
     // Roe averaged total enthalpy
     const scalar HTilde = wLeft*HLeft + wRight*HRight;
 
-    // Roe averaged kappa
-    // TODO: needs to be verified!
-    const scalar kappaTilde = wLeft*kappaLeft + wRight*kappaRight;
-
     // Speed of sound with Roe reconstruction values
-    // TODO: not sure if the correct (flow speed) and kappa is used here
-    const scalar aTilde =
-        Foam::sqrt(max(0 ,(kappaTilde - 1)*(HTilde - 0.5*sqr(contrUTilde))));
+    const scalar pTilde = wLeft*pLeft + wRight*pRight;
+    const scalar TTilde = gas().THs(HTilde - 0.5*sqr(contrUTilde), pTilde, (TLeft+TRight)/2);
+    const scalar aTilde = gas().c(pTilde, TTilde);
 
     // Step 3: compute signal speeds for face:
     const scalar SLeft  = min(qLeft - aLeft, contrUTilde - qMesh - aTilde);
