@@ -37,6 +37,7 @@ SourceFiles
 #define AungierRedlichKwongGas_H
 
 #include "autoPtr.H"
+#include "specie.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

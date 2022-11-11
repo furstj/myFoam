@@ -165,7 +165,7 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::S
     scalar T
 ) const
 {
-    const scalar Pr = p/Pc_;
+    //const scalar Pr = p/Pc_;
     const scalar Tr = T/Tc_;
     const scalar alpha = alpha0_*pow(Tr, -n_);
     const scalar B = b_*p/T;
@@ -212,7 +212,6 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::Z
     const scalar C = p*(-RT*b_ + alpha - sqr(b_)*p + b_*c_*p)/sqr(RT);
     const scalar D = alpha*sqr(p)*(c_ - b_)/pow3(RT);
 
-    
     // Solve Z^3 + B*Z^2 + C*Z + D = 0, return maximal real root 
     scalar root = 0;
     

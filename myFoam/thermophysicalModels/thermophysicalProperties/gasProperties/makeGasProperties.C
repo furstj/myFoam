@@ -28,6 +28,7 @@ License
 #include "specie.H"
 #include "perfectGas.H"
 #include "PengRobinsonGas.H"
+#include "AungierRedlichKwongGas.H"
 #include "hConstThermo.H"
 #include "eConstThermo.H"
 #include "janafThermo.H"
@@ -39,6 +40,7 @@ License
 #include "sutherlandTransport.H"
 
 #include "hPolynomialThermo.H"
+#include "hTabulatedThermo.H"
 #include "polynomialTransport.H"
 
 
@@ -57,6 +59,14 @@ makeGasProperties(
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
+    perfectGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
     perfectGas,
     specie
 );
@@ -96,10 +106,43 @@ makeGasProperties(
 makeGasProperties(
     sutherlandTransport,
     sensibleEnthalpy,
+    hPolynomialThermo,
+    PengRobinsonGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
     janafThermo,
     PengRobinsonGas,
     specie
 );
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    AungierRedlichKwongGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    AungierRedlichKwongGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    AungierRedlichKwongGas,
+    specie
+);
+
 
 // - Optimized gas properties
 

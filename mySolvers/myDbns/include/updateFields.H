@@ -45,13 +45,13 @@
     h.correctBoundaryConditions();
 
     // Bound enthalpy
-    dimensionedScalar CpMin = min(Cp);
-    dimensionedScalar CpMax = max(Cp);
+    //dimensionedScalar CpMin = min(Cp);
+    //dimensionedScalar CpMax = max(Cp);
 
-    dimensionedScalar hMin = CpMin*TMin;
-    dimensionedScalar hMax = CpMax*TMax;
+    //dimensionedScalar hMin = CpMin*TMin;
+    //dimensionedScalar hMax = CpMax*TMax;
 
-    boundMinMax(h, hMin, hMax);
+    //boundMinMax(h, hMin, hMax);
 
     p.correctBoundaryConditions();
     boundMinMax(p, pMin, pMax);

@@ -1,4 +1,5 @@
 basic/rhoThermo/rhoThermos.C
+basic/psiThermo/psiThermos.C
 thermophysicalProperties/gasProperties/gasProperties.C
 thermophysicalProperties/gasProperties/makeGasProperties.C
 
