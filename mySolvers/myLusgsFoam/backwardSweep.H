@@ -31,7 +31,8 @@
                     scalar rho1  = rho[nei] + dRho[nei];
                     vector rhoU1 = rhoU[nei] + dRhoU[nei];
                     scalar rhoE1 = rhoE[nei] + dRhoE[nei];
-                    scalar p1    = (kappa[nei]-1) * (rhoE1 - 0.5*magSqr(rhoU1)/rho1);
+                    scalar e1 = rhoE1/rho1 - 0.5*magSqr(rhoU1)/sqr(rho1);
+                    scalar p1 = gasProps->pEs(e1, rho1, T[nei]);
 
                     scalar phi0 = U[nei] & Sf[faceI];
                     scalar phi1 = (rhoU1/rho1) & Sf[faceI];

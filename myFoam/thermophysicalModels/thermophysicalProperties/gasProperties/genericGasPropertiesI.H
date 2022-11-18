@@ -153,9 +153,9 @@ scalar genericGasProperties<TransportModel>::beta_T(scalar p, scalar T) const
 template<typename TransportModel>
 scalar genericGasProperties<TransportModel>::c(scalar p, scalar T) const
 {
-    scalar v = 1/rho(p,T);
-    scalar cp = Cp(p,T);
-    return sqrt( cp*v/(cp*beta_T(p,T) - T*v*sqr(beta_p(p,T))) );
+    scalar cp = Cp(p,T);                                                \
+    scalar gamma = cp / (cp - R());                                     \
+    return sqrt(gamma*R()*T);                                           \
 }
 
 
@@ -187,7 +187,43 @@ scalar genericGasProperties<TransportModel>::TEa(const scalar Ea, const scalar p
 {
     return transport_.TEa(Ea, p, T0);
 }
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::pEs(const scalar Es, const scalar rho, const scalar T0)
+    const
+{
+    scalar T = T0;
+    scalar p = rho*R()*T;   // Estimate from perfect gas!
+    const scalar tol = 1.e-5;
+    const label maxIter = 100;
+
+    const scalar TTol = T*tol;
+    const scalar pTol = p*tol;
     
+    label iter = 0;
+    scalar dT, dp;
+    
+    do
+    {
+        dT = (Es - this->Es(p, T))/ this->Cv(p,T);
+        dp = this->Z(p,T)*R()*rho*dT;
+        T += dT;
+        p += dp;
+
+        if (iter++ > maxIter)
+        {
+            FatalErrorInFunction
+                << "Maximum number of iterations exceeded: " << maxIter
+                << " when starting from T0:" << T0
+                << " T  : " << T
+                << " p  : " << p
+                << " tol: " << tol
+                << abort(FatalError);
+        }
+    } while ( (mag(dT) > TTol) || (mag(dp) > pTol) );
+    return p;
+}
+
 
 template<typename TransportModel>
 scalar genericGasProperties<TransportModel>::mu(scalar p, scalar T) const

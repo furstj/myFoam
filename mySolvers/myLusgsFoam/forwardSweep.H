@@ -58,7 +58,8 @@
                     scalar rho1  = rho[own] + dRhoStar[own];
                     vector rhoU1 = rhoU[own] + dRhoUStar[own];
                     scalar rhoE1 = rhoE[own] + dRhoEStar[own];
-                    scalar p1    = (kappa[own]-1) * (rhoE1 - 0.5*magSqr(rhoU1)/rho1);
+                    scalar e1 = rhoE1/rho1 - 0.5*magSqr(rhoU1)/sqr(rho1);
+                    scalar p1 = gasProps->pEs(e1, rho1, T[own]);
 
                     scalar phi0 = U[own] & Sf[faceI];
                     scalar phi1 = (rhoU1/rho1) & Sf[faceI];

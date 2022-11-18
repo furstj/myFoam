@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     {
         auto dummy = fvc::ddt(U);
     } 
-  
+
     Info<< "\nStarting time loop\n" << endl;
 
     scalar CoNum = 0.0;

@@ -146,81 +146,60 @@ makeGasProperties(
 
 // - Optimized gas properties
 
-// ---- constTransport, hConstThermo, perfectGas, sensibleEnthalpy ----
+// - perfectGas, hConst
 
-template<>
-scalar genericGasProperties<
-    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::c(scalar p, scalar T) const
-{
-    scalar cp = Cp(p,T);
-    scalar gamma = cp / (cp - R());
-    return sqrt(gamma*R()*T);
-}
+#define optimizePerfectGas(Transport,Type)                                 \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
+        >::c(scalar p, scalar T) const                                     \
+    {                                                                      \
+        scalar cp = Cp(p,T);                                               \
+        scalar gamma = cp / (cp - R());                                    \
+        return sqrt(gamma*R()*T);                                          \
+    }                                                                      \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
+        >::beta_p(scalar p, scalar T) const                                \
+    {                                                                      \
+        return 1/T;                                                        \
+    }                                                                      \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
+        >::beta_T(scalar p, scalar T) const                                \
+    {                                                                      \
+        return 1/p;                                                        \
+    }                                                                      \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
+    >::THs(const scalar Hs, const scalar p, const scalar T0) const         \
+    {                                                                      \
+        scalar Href = this->Hs(0,0);                                       \
+        return (Hs - Href)/Cp(p,T0);                                       \
+    }                                                                      \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
+    >::pEs(const scalar Es, const scalar rho, const scalar T0) const       \
+    {                                                                      \
+        scalar Eref = this->Es(0,0);                                       \
+        scalar T = (Es - Eref)/Cv(0,0);                                    \
+        return rho*R()*T;                                                  \
+    }                                                                      \
+                                                                           \
+    
 
-template<>
-scalar genericGasProperties<
-    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::beta_p(scalar p, scalar T) const
-{
-    return 1/T;
-}
 
-template<>
-scalar genericGasProperties<
-    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::beta_T(scalar p, scalar T) const
-{
-    return 1/p;
-}
-
-template<>
-scalar genericGasProperties<
-    constTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::THs(const scalar Hs, const scalar p, const scalar T0) const
-{
-    scalar Href = this->Hs(0,0);
-    return (Hs - Href)/Cp(p,T0);
-}
-
-
-// ---- sutherlandTransport, hConstThermo, perfectGas, sensibleEnthalpy ----
-
-template<>
-scalar genericGasProperties<
-    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::c(scalar p, scalar T) const
-{
-    scalar cp = Cp(p,T);
-    scalar gamma = cp / (cp - R());
-    return sqrt(gamma*R()*T);
-}
-
-template<>
-scalar genericGasProperties<
-    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::beta_p(scalar p, scalar T) const
-{
-    return 1/T;
-}
-
-template<>
-scalar genericGasProperties<
-    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::beta_T(scalar p, scalar T) const
-{
-    return 1/p;
-}
-
-template<>
-scalar genericGasProperties<
-    sutherlandTransport<species::thermo<hConstThermo<perfectGas<specie>>,sensibleEnthalpy>>
-    >::THs(const scalar Hs, const scalar p, const scalar T0) const
-{
-    scalar Href = this->Hs(0,0);
-    return (Hs - Href)/Cp(p,T0);
-}
-
+optimizePerfectGas(constTransport, sensibleEnthalpy);
+optimizePerfectGas(sutherlandTransport, sensibleEnthalpy);
 
 }
 
