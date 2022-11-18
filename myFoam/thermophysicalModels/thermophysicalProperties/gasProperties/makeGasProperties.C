@@ -190,8 +190,9 @@ makeGasProperties(
         Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
     >::pEs(const scalar Es, const scalar rho, const scalar T0) const       \
     {                                                                      \
-        scalar Eref = this->Es(0,0);                                       \
-        scalar T = (Es - Eref)/Cv(0,0);                                    \
+	const scalar pRef = 1.e5;                                          \
+        scalar Eref = this->Es(pRef,T0);                                   \
+        scalar T = T0 + (Es - Eref)/Cv(pRef,T0);                           \
         return rho*R()*T;                                                  \
     }                                                                      \
                                                                            \
