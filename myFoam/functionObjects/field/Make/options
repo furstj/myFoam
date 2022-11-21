@@ -1,0 +1,12 @@
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/functionObjects/field/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I../../thermophysicalModels/lnInclude \
+
+
+LIB_LIBS = \
+    -lfieldFunctionObjects \
+    -L$(FOAM_USER_LIBBIN) -lmyThermophysicalModels

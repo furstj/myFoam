@@ -1,0 +1,80 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       sutherland;
+    thermo          hPolynomial; 
+    equationOfState PengRobinsonGas; //AungierRedlichKwongGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        nMoles      1;
+        molWeight   28.0134;
+    }
+    equationOfState
+    {
+        Tc  126.20;
+        Vc  0.003216;
+        Pc  3.3980e6;
+        omega 0.037;
+    }
+    thermodynamics
+    {   
+        Hf 0; //309.3e3;
+        Sf 0;
+        //Tref 0;
+        //Href 0;
+        Tref 298.15;
+        Href 309.3e3;
+        Cp 1039;
+        CpCoeffsOLD<8>     ( 1039 0 0 0 0 0 0 0 );
+        CpCoeffs<8> (
+            1154.3409485025102
+            -1.8460073209525794
+             0.013203421240711074
+            -5.241743042031589e-5
+             1.21438123208857e-7
+            -1.6152834889738148e-10
+             1.1555318591665634e-13
+            -3.4717103034040385e-17
+        );
+        // janaf
+        Tlow            200;
+        Thigh           6000;
+        Tcommon         1000;
+        highCpCoeffs    ( 2.95258 0.0013969 -4.92632e-07 7.8601e-11 -4.60755e-15  923.949 0  );
+        lowCpCoeffs     ( 3.53101 -0.000123661 -5.02999e-07 2.43531e-09 -1.40881e-12 1046.98 0 );
+
+    }
+    transport
+    {
+        As          1.458e-6;
+        Ts          110.4;
+        Pr          0.72;
+    }
+}
+
+
+// ************************************************************************* //

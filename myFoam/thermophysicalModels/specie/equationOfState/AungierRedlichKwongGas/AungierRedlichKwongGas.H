@@ -101,22 +101,22 @@ class AungierRedlichKwongGas
         //- Acentric factor [-]
         scalar omega_;
 
+        //- parameter a [m^5/(kg*s^2)]]
+        scalar a_;
+
         //- parameter b [m^3/kg]
         scalar b_;
 
         //- parameter b [m^3/kg]
         scalar c_;
 
-        //- parameter alpha0 [?]
-        scalar alpha0_;
-
         //- parameter n [-]
         scalar n_;
 
     // Private methods
-    inline Foam::scalar dpdV(scalar V, scalar T, scalar a) const;
+    inline Foam::scalar dpdV(scalar V, scalar T, scalar alpha) const;
 
-    inline Foam::scalar dpdT(scalar V) const;
+    inline Foam::scalar dpdT(scalar V, scalar T, scalar alpha) const;
 
 
 public:

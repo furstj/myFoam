@@ -49,9 +49,9 @@ inline Foam::AungierRedlichKwongGas<Specie>::AungierRedlichKwongGas
     omega_(omega)
 {
     n_ = 0.4986 + 1.1735*omega_ + 0.4754*sqr(omega_);
-    alpha0_ = 0.42747*sqr(this->R()*Tc_)/Pc_;
+    a_ = 0.42747*sqr(this->R()*Tc_)/Pc_;
     b_ = 0.08664*this->R()*Tc_/Pc;
-    c_ = this->R()*Tc_/(Pc_ + alpha0_/(Vc_*(Vc_ + b_))) + b_ - Vc_;
+    c_ = this->R()*Tc_/(Pc_ + a_/(Vc_*(Vc_ + b_))) + b_ - Vc_;
 }
 
 
@@ -69,9 +69,9 @@ inline Foam::AungierRedlichKwongGas<Specie>::AungierRedlichKwongGas
     Vc_(pg.Vc_),
     Pc_(pg.Pc_),
     omega_(pg.omega_),
+    a_(pg.a_),
     b_(pg.b_),
     c_(pg.c_),
-    alpha0_(pg.alpha0_),
     n_(pg.n_)
 {}
 
@@ -116,28 +116,33 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::rho
 
 
 template<class Specie>
+inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::dpdV(scalar V, scalar T, scalar alpha)
+    const
+{
+    return (- this->R()*T/sqr(V - b_ + c_) + alpha/(V*sqr(V + b_)) + alpha/(sqr(V)*(V + b_)));
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::dpdT(scalar V, scalar T, scalar alpha)
+    const
+{
+    return this->R()/(V - b_ + c_) + alpha*n_/(T*V*(V + b_));
+}
+
+
+template<class Specie>
 inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::H(scalar p, scalar T) const
 {
 
     const scalar Z = this->Z(p, T);
     const scalar V = Z*this->R()*T/p;
     const scalar Tr = T/Tc_;
-    const scalar alpha = alpha0_*pow(Tr, -n_);
-    scalar Hdep = -p*V + this->R()*T + (n_ + 1)/b_*alpha*log((V + b_)/V);
+
+    scalar Hdep = p*V - this->R()*T - a_/b_*(n_ + 1)*pow(Tr, -n_)*log((V + b_)/V);
     return Hdep;
 }
 
-template<class Specie>
-inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::dpdV(scalar V, scalar T, scalar a) const
-{
-    return (- this->R()*T/sqr(V - b_ + c_) + a/(V*sqr(V + b_)) + a/(sqr(V)*(V + b_)));
-}
-
-template<class Specie>
-inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::dpdT(scalar V) const
-{
-    return this->R()/(V - b_ + c_);
-}
 
 template<class Specie>
 inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::Cp(scalar p, scalar T) const
@@ -145,16 +150,16 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::Cp(scalar p, scalar T)
     const scalar Z = this->Z(p, T);
     const scalar V = Z*this->R()*T/p;
     const scalar Tr = T/Tc_;
-    const scalar alpha = alpha0_*pow(Tr, -n_);
+    const scalar alpha = a_*pow(Tr, -n_);
 
-    const scalar dVdT = - this->dpdT(V)/this->dpdV(V,T,alpha);
+    const scalar dVdT = - this->dpdT(V, T, alpha)/this->dpdV(V, T, alpha);
 
     // Cp = dHdT_p
-    const scalar result = -p*dVdT + this->R()
-        + (n_ + 1)/b_*(-n_/T)*alpha*log((V + b_)/V)
-        - (n_ + 1)*alpha/(V*(V + b_))*dVdT;
+    const scalar cpdep = p*dVdT - this->R()
+        + alpha/b_*n_*(n_ + 1)/T*log((V + b_)/V)
+        + alpha*(n_ + 1)*dVdT/V/(V + b_);
 
-    return result;
+    return cpdep;
 }
 
 
@@ -165,23 +170,15 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::S
     scalar T
 ) const
 {
-    //const scalar Pr = p/Pc_;
     const scalar Tr = T/Tc_;
-    const scalar alpha = alpha0_*pow(Tr, -n_);
-    const scalar B = b_*p/T;
+    const scalar alpha = a_*pow(Tr, -n_);
 
     const scalar Z = this->Z(p, T);
     const scalar V = Z*this->R()*T/p;
-
-    return
-        this->R()
-        *(
-            - log(p/Pstd)
-            + (
-                log(Z - B)
-                - n_*alpha/(T*b_) * log((V+b_)/V)
-            )
-        );
+    const scalar V0 = this->R()*Tstd/Pstd;
+    
+    const scalar Sdep = this->R()*log((V - b_ + c_)/V0) - n_*alpha/b_/T*log((V + b_)/V);
+    return Sdep;
 }
 
 
@@ -206,7 +203,7 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::Z
 {
     const scalar Tr = T/Tc_;
     const scalar RT = this->R()*T;
-    const scalar alpha = alpha0_*pow(Tr, -n_);
+    const scalar alpha = a_*pow(Tr, -n_);
     
     const scalar B = c_*p/RT - 1;
     const scalar C = p*(-RT*b_ + alpha - sqr(b_)*p + b_*c_*p)/sqr(RT);
@@ -259,10 +256,10 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::CpMCv
     const scalar Z = this->Z(p, T);
     const scalar V = Z*this->R()*T/p;
     const scalar Tr = T/Tc_;
-    const scalar alpha = alpha0_*pow(Tr, -n_);
+    const scalar alpha = a_*pow(Tr, -n_);
 
     const scalar kappa= -1/(V*this->dpdV(V,T,alpha));
-    const scalar beta = this->dpdT(V)*kappa;
+    const scalar beta = this->dpdT(V, T, alpha)*kappa;
 
     return V*T*sqr(beta)/kappa;
 }
@@ -289,9 +286,9 @@ inline void Foam::AungierRedlichKwongGas<Specie>::operator+=
         Pc_ = Y1*Pc_ + Y2*pg.Pc_;
         omega_ = Y1*omega_ + Y2*pg.omega_;
         n_ = 0.4986 + 1.1735*omega_ + 0.4754*sqr(omega_);
-        alpha0_ = 0.42747*sqr(this->R()*Tc_)/Pc_;
+        a_ = 0.42747*sqr(this->R()*Tc_)/Pc_;
         b_ = 0.08664*this->R()*Tc_/Pc_;
-        c_ = this->R()*Tc_/(Pc_ + alpha0_/(Vc_*(Vc_ + b_))) + b_ - Vc_;
+        c_ = this->R()*Tc_/(Pc_ + a_/(Vc_*(Vc_ + b_))) + b_ - Vc_;
     }
 }
 
