@@ -175,9 +175,9 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::S
 
     const scalar Z = this->Z(p, T);
     const scalar V = Z*this->R()*T/p;
-    const scalar V0 = this->R()*Tstd/Pstd;
+    const scalar Vstd = this->R()*Tstd/Pstd;
     
-    const scalar Sdep = this->R()*log((V - b_ + c_)/V0) - n_*alpha/b_/T*log((V + b_)/V);
+    const scalar Sdep = -this->R()*log(T/Tstd) + this->R()*log((V - b_ + c_)/Vstd) - n_*alpha/b_/T*log((V + b_)/V);
     return Sdep;
 }
 
