@@ -153,9 +153,11 @@ scalar genericGasProperties<TransportModel>::beta_T(scalar p, scalar T) const
 template<typename TransportModel>
 scalar genericGasProperties<TransportModel>::c(scalar p, scalar T) const
 {
-    scalar cp = Cp(p,T);                                                \
-    scalar gamma = cp / (cp - R());                                     \
-    return sqrt(gamma*R()*T);                                           \
+    scalar cp = Cp(p,T);
+    scalar cv = cp - CpMCv(p,T);
+    scalar gamma_pv = cp/cv/beta_T(p,T)/p;
+    scalar z = Z(p,T);
+    return sqrt(gamma_pv*z*R()*T);
 }
 
 

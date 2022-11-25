@@ -76,8 +76,8 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     const scalar rhoRight = gas().rho(pRight, TRight);
 
     // DensityTotalEnthalpy
-    const scalar rhoHLeft  = rhoLeft*gas().Hs(pLeft, TLeft) + pLeft;
-    const scalar rhoHRight = rhoRight*gas().Hs(pRight, TRight) + pRight;
+    const scalar rhoHLeft  = rhoLeft*(gas().Hs(pLeft, TLeft) + 0.5*magSqr(ULeft));
+    const scalar rhoHRight = rhoRight*(gas().Hs(pRight, TRight) + 0.5*magSqr(URight));
 
     // DensityVelocity
     const vector rhoULeft = rhoLeft*ULeft;
