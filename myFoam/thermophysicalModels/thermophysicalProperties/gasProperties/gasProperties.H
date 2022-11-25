@@ -152,6 +152,9 @@ public:
     //- Pressure from sensible internal energy and density given an initial T0
     virtual scalar pEs(const scalar Es, const scalar rho, const scalar T0) const = 0;
     
+    //- Temperature from pressure and entropy given an initial T0
+    virtual scalar TpS(const scalar p, const scalar S, const scalar T0) const = 0;
+    
     // Physical properties
     
     //- Gas viscosity [Pa s]

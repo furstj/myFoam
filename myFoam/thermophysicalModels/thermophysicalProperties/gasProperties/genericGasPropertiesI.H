@@ -228,6 +228,40 @@ scalar genericGasProperties<TransportModel>::pEs(const scalar Es, const scalar r
 
 
 template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::TpS(const scalar p, const scalar S, const scalar T0)
+    const
+{
+    scalar T = T0;
+    const scalar tol = 1.e-5;
+    const label maxIter = 100;
+
+    const scalar TTol = T*tol;
+    
+    label iter = 0;
+    scalar dT;
+    
+    do
+    {
+        scalar dS = S - this->S(p, T);
+        dT = T/this->Cp(p,T)*dS;
+        T += dT;
+
+        if (iter++ > maxIter)
+        {
+            FatalErrorInFunction
+                << "Maximum number of iterations exceeded: " << maxIter
+                << " when starting from T0:" << T0
+                << " T  : " << T
+                << " p  : " << p
+                << " tol: " << tol
+                << abort(FatalError);
+        }
+    } while ( mag(dT) > TTol);
+    return T;
+}
+
+
+template<typename TransportModel>
 scalar genericGasProperties<TransportModel>::mu(scalar p, scalar T) const
 {
     return transport_.mu(p,T);

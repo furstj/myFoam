@@ -14,6 +14,9 @@ $(bocos)/subsonicOutletVelocity/subsonicOutletVelocityFvPatchVectorField.C
 $(bocos)/subsonicOutletTemperature/subsonicOutletTemperatureFvPatchScalarField.C
 $(bocos)/blendedMean/blendedMeanFvPatchFields.C
 $(bocos)/myPressureDirectedInletVelocity/myPressureDirectedInletVelocityFvPatchVectorField.C
+$(bocos)/isentropicInlet/isentropicInletPressureFvPatchScalarField.C
+$(bocos)/isentropicInlet/isentropicInletVelocityFvPatchVectorField.C
+$(bocos)/isentropicInlet/isentropicInletTemperatureFvPatchScalarField.C
 
 ddtSchemes = finiteVolume/finiteVolume/ddtSchemes
 
