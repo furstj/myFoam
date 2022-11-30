@@ -34,6 +34,9 @@ License
 #include "totalTemperatureFvPatchScalarField.H"
 #include "subsonicInletTotalFvPatchVectorField.H"
 #include "myPressureDirectedInletVelocityFvPatchVectorField.H"
+#include "isentropicInletPressureFvPatchScalarField.H"
+#include "isentropicInletTemperatureFvPatchScalarField.H"
+#include "isentropicInletVelocityFvPatchVectorField.H"
 #include "psiThermo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -200,10 +203,26 @@ bool Foam::functionObjects::mixingInterface::execute()
 
         volScalarField::Boundary& pb =
             const_cast<volScalarField*>(&p)->boundaryFieldRef();
+        scalarField* p0Ptr = NULL;
 
-        totalPressureFvPatchScalarField& pp =
-            refCast<totalPressureFvPatchScalarField>(pb[downstreamPatchID_]);
-        auto& p0 = pp.p0();
+        if (pb[downstreamPatchID_].type() == "totalPressure")
+        {
+            auto& pp = refCast<totalPressureFvPatchScalarField>(pb[downstreamPatchID_]);
+            p0Ptr = &pp.p0();
+        }
+        else if (pb[downstreamPatchID_].type() == "isentropicInletPressure")
+        {
+            auto& pp = refCast<isentropicInletPressureFvPatchScalarField>(pb[downstreamPatchID_]);
+            p0Ptr = &pp.p0();
+        }
+	else 
+	{
+            FatalErrorIn("mixingInterface::execute()") 
+                << "the mixing interface works only with totalPressure "
+                << "or isentropicInletPressure boundary conditions!"
+                << abort(FatalError);
+        }        
+        auto& p0 = *p0Ptr;
 
         forAll(p0, i)
         {
@@ -226,9 +245,27 @@ bool Foam::functionObjects::mixingInterface::execute()
         volScalarField::Boundary& Tb =
             const_cast<volScalarField*>(&T)->boundaryFieldRef();
 
-        totalTemperatureFvPatchScalarField& pT =
-            refCast<totalTemperatureFvPatchScalarField>(Tb[downstreamPatchID_]);
-        auto& T0 = pT.T0();
+        scalarField* T0Ptr = NULL;
+
+        if (Tb[downstreamPatchID_].type() == "totalTemperature")
+        {
+            auto& pT = refCast<totalTemperatureFvPatchScalarField>(Tb[downstreamPatchID_]);
+            T0Ptr = &pT.T0();
+        }
+        else if (Tb[downstreamPatchID_].type() == "isentropicInletTemperature")
+        {
+            auto& pT = refCast<isentropicInletTemperatureFvPatchScalarField>(Tb[downstreamPatchID_]);
+            T0Ptr = &pT.T0();
+        }
+	else 
+	{
+            FatalErrorIn("mixingInterface::execute()") 
+                << "the mixing interface works only with totalTemperature "
+                << "or isentropicInletTemperature boundary conditions!"
+                << abort(FatalError);
+        }
+        
+        auto& T0 = *T0Ptr;
         forAll(T0, i)
         {
             vector x = mesh().Cf().boundaryField()[downstreamPatchID_][i];
@@ -258,11 +295,17 @@ bool Foam::functionObjects::mixingInterface::execute()
             auto& pU = refCast<myPressureDirectedInletVelocityFvPatchVectorField>(Ub[downstreamPatchID_]);
 	    inletDirPtr = &pU.inletDirection();
 	}
-	else
+	else if (Ub[downstreamPatchID_].type() == "isentropicInletVelocity")
+	{
+            auto& pU = refCast<isentropicInletVelocityFvPatchVectorField>(Ub[downstreamPatchID_]);
+	    inletDirPtr = &pU.inletDirection();
+	}
+	else 
 	{
             FatalErrorIn("mixingInterface::execute()") 
-                << "the mixing interface works only with subsonicInletTotal "
-                << "or myPressureDirectedInletVelocity boundary conditions!"
+                << "the mixing interface works only with subsonicInletTotal, "
+                << "isentropicInletVelocity or myPressureDirectedInletVelocity "
+                << "boundary conditions!"
                 << abort(FatalError);
         }
       	auto& inletDir = *inletDirPtr;
