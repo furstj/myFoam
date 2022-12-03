@@ -212,7 +212,7 @@ public:
             );
 
 
-        //- Update the coefficients associated with the patch field
+        //- Evaluate the patch field
         virtual void updateCoeffs();
 
         //- Write

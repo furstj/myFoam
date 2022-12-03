@@ -159,6 +159,7 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
+    
     const fvMesh& mesh = patch().boundaryMesh().mesh();
 
     const auto& thermo =
@@ -170,7 +171,7 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         patch().patchField<volScalarField, scalar>(
             db().lookupObject<volScalarField>(pName_)
         );
-    const_cast<fvPatchScalarField&>(pp).updateCoeffs();
+    const_cast<fvPatchScalarField&>(pp).evaluate();
     
     const fvPatchScalarField& pT = 
         patch().patchField<volScalarField, scalar>(
@@ -200,7 +201,6 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
 
         scalar S = gasProps->S(p0[faceI], T0[faceI]);
         scalar p = min(pp[faceI], p0[faceI]);
-
         scalar T = gasProps->TpS(p, S, pT[faceI]);
 
         scalar h  = gasProps->Hs(p, T);
@@ -211,8 +211,9 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         refValue[faceI] = dir*uMag;
         valFraction[faceI] = pos0(H0-h);
     }
-    
+
     mixedFvPatchVectorField::updateCoeffs();
+    
 }
 
 

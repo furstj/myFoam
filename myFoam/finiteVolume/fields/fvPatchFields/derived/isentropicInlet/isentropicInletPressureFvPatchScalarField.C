@@ -153,8 +153,7 @@ void Foam::isentropicInletPressureFvPatchScalarField::updateCoeffs()
     {
         return;
     }
-
-    mixedFvPatchScalarField::updateCoeffs();
+    mixedFvPatchScalarField::updateCoeffs();    
 }
 
 

@@ -167,7 +167,6 @@ void Foam::isentropicInletTemperatureFvPatchScalarField::updateCoeffs()
         patch().patchField<volScalarField, scalar>(
             db().lookupObjectRef<volScalarField>(pName_)
         );
-    const_cast<fvPatchScalarField&>(pp).updateCoeffs();
     
     scalarField p0;
     if (pp.type() == "isentropicInletPressure")
@@ -183,14 +182,14 @@ void Foam::isentropicInletTemperatureFvPatchScalarField::updateCoeffs()
     }
     
     scalarField& pT = *this;
-    
+
     forAll(pT, faceI) {
         scalar S = gasProps->S(p0[faceI], T0_[faceI]);
         scalar p = min(pp[faceI], p0[faceI]);
         scalar T = gasProps->TpS(p, S, pT[faceI]);
         pT[faceI] = T;
     }
-    
+
     fixedValueFvPatchScalarField::updateCoeffs();
 }
 
