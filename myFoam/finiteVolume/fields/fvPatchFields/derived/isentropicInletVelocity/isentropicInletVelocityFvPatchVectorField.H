@@ -34,8 +34,8 @@ Description
     invariant going along the outward directed characteristics 
     (see e.g. Blazek)
 
-    The boundary condition is valid only for compressible ideal gas and it is
-    compatible with totalTemperature for T and totalPressure for p.
+    The boundary condition is valid for compressible real gas and it is
+    compatible with isentropicTemperature for T and isentropicPressure for p.
 
 See also
     Foam::mixedFvPatchVectorField
@@ -65,6 +65,9 @@ class isentropicInletVelocityFvPatchVectorField
     public mixedFvPatchVectorField
 {
     // Private data
+
+        //- Pressure field name
+        word pName_;
 
         //- Temperature field name
         word TName_;
@@ -162,6 +165,18 @@ public:
 
 
         // Access
+
+            //- Return the name of p
+            const word& pName() const
+            {
+                return pName_;
+            }
+
+            //- Return reference to the name of p to allow adjustment
+            word& pName()
+            {
+                return pName_;
+            }
 
             //- Return the name of T
             const word& TName() const

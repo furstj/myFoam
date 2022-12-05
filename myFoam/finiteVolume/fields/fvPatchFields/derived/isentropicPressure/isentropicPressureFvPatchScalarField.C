@@ -31,6 +31,9 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "fluidThermo.H"
+#include "gasProperties.H"
+#include "isentropicTemperatureFvPatchScalarField.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -41,12 +44,10 @@ Foam::isentropicPressureFvPatchScalarField::isentropicPressureFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
+    fixedValueFvPatchScalarField(p, iF),  
     UName_("U"),
+    TName_("T"),
     phiName_("phi"),
-    rhoName_("rho"),
-    psiName_("none"),
-    gamma_(0.0),
     p0_(p.size(), Zero)
 {}
 
@@ -60,10 +61,8 @@ Foam::isentropicPressureFvPatchScalarField::isentropicPressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict, false),
     UName_(dict.getOrDefault<word>("U", "U")),
+    TName_(dict.getOrDefault<word>("T", "T")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
-    rhoName_(dict.getOrDefault<word>("rho", "rho")),
-    psiName_(dict.getOrDefault<word>("psi", "none")),
-    gamma_(psiName_ != "none" ? dict.get<scalar>("gamma") : 1),
     p0_("p0", dict, p.size())
 {
     if (dict.found("value"))
@@ -90,10 +89,8 @@ Foam::isentropicPressureFvPatchScalarField::isentropicPressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
+    TName_(ptf.TName_),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    psiName_(ptf.psiName_),
-    gamma_(ptf.gamma_),
     p0_(ptf.p0_, mapper)
 {}
 
@@ -105,10 +102,8 @@ Foam::isentropicPressureFvPatchScalarField::isentropicPressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(tppsf),
     UName_(tppsf.UName_),
+    TName_(tppsf.TName_),
     phiName_(tppsf.phiName_),
-    rhoName_(tppsf.rhoName_),
-    psiName_(tppsf.psiName_),
-    gamma_(tppsf.gamma_),
     p0_(tppsf.p0_)
 {}
 
@@ -121,10 +116,8 @@ Foam::isentropicPressureFvPatchScalarField::isentropicPressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(tppsf, iF),
     UName_(tppsf.UName_),
+    TName_(tppsf.TName_),
     phiName_(tppsf.phiName_),
-    rhoName_(tppsf.rhoName_),
-    psiName_(tppsf.psiName_),
-    gamma_(tppsf.gamma_),
     p0_(tppsf.p0_)
 {}
 
@@ -167,66 +160,59 @@ void Foam::isentropicPressureFvPatchScalarField::updateCoeffs
         return;
     }
 
-    const fvsPatchField<scalar>& phip =
+    const fvPatchScalarField& Tp =
+        patch().lookupPatchField<volScalarField, scalar>(TName_);
+
+    const fvsPatchScalarField& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
-    if (internalField().dimensions() == dimPressure)
+    const fluidThermo& thermo =
+        db().lookupObject<fluidThermo>(fluidThermo::dictName);
+
+    autoPtr<gasProperties> gasProps(gasProperties::New(thermo));
+    
+    scalarField& pp = *this;
+
+    const scalarField& T0 = refCast<const isentropicTemperatureFvPatchScalarField>(Tp).T0();
+    
+    forAll(Tp, faceI)
     {
-        if (psiName_ == "none")
+        scalar S  = gasProps->S(p0p[faceI], T0[faceI]);
+        scalar Hs = gasProps->Hs(p0p[faceI], T0[faceI]) - 0.5*magSqr(Up[faceI]);
+        scalar p = pp[faceI];
+        scalar T = Tp[faceI];
+
+        const label maxIter = 100;
+        label iter = 0;
+        scalar pTol = 1.e-6*p;
+        scalar dp;
+
+        if (phip[faceI] < 0)
         {
-            // Variable density and low-speed compressible flow
-
-            const fvPatchField<scalar>& rho =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
-
-            operator==(p0p - 0.5*rho*(1.0 - pos0(phip))*magSqr(Up));
+            do
+            {
+                T = gasProps->TpS(p, S, T);
+                scalar rho = gasProps->rho(p, T);
+                scalar dh = gasProps->Hs(p, T) - Hs;
+                dp = rho*dh;
+                p -= dp;
+                
+                if (iter++ > maxIter)
+                {
+                    FatalErrorInFunction
+                        << "Maximum number of iterations exceeded: " << maxIter
+                            << " T  : " << T
+                            << " p  : " << p
+                            << abort(FatalError);
+                }
+                
+            } while ( mag(dp) > pTol );
+            pp[faceI] = p;
         }
         else
         {
-            // High-speed compressible flow
-
-            const fvPatchField<scalar>& psip =
-                patch().lookupPatchField<volScalarField, scalar>(psiName_);
-
-            if (gamma_ > 1)
-            {
-                scalar gM1ByG = (gamma_ - 1)/gamma_;
-
-                operator==
-                (
-                    p0p
-                   /pow
-                    (
-                        (1.0 + 0.5*psip*gM1ByG*(1.0 - pos0(phip))*magSqr(Up)),
-                        1.0/gM1ByG
-                    )
-                );
-            }
-            else
-            {
-                operator==(p0p/(1.0 + 0.5*psip*(1.0 - pos0(phip))*magSqr(Up)));
-            }
-        }
-
-    }
-    else if (internalField().dimensions() == dimPressure/dimDensity)
-    {
-        // Incompressible flow
-        operator==(p0p - 0.5*(1.0 - pos0(phip))*magSqr(Up));
-    }
-    else
-    {
-        FatalErrorInFunction
-            << " Incorrect pressure dimensions " << internalField().dimensions()
-            << nl
-            << "    Should be " << dimPressure
-            << " for compressible/variable density flow" << nl
-            << "    or " << dimPressure/dimDensity
-            << " for incompressible flow," << nl
-            << "    on patch " << this->patch().name()
-            << " of field " << this->internalField().name()
-            << " in file " << this->internalField().objectPath()
-            << exit(FatalError);
+            pp[faceI] = p0_[faceI];
+        };
     }
 
     fixedValueFvPatchScalarField::updateCoeffs();
@@ -247,10 +233,8 @@ void Foam::isentropicPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("T", "T", TName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
-    os.writeEntry("rho", rhoName_);
-    os.writeEntry("psi", psiName_);
-    os.writeEntry("gamma", gamma_);
     p0_.writeEntry("p0", os);
     writeEntry("value", os);
 }

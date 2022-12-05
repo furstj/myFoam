@@ -182,18 +182,18 @@ void Foam::isentropicTemperatureFvPatchScalarField::updateCoeffs()
 
         const label maxIter = 100;
         label iter = 0;
-        scalar hTol = 1.e-6*Hs;
-        scalar dh;
+        scalar pTol = 1.e-6*p;
+        scalar dp;
 
         if (phip[faceI] < 0)
         {
             do
             {
-                iter++;
                 T = gasProps->TpS(p, S, T);
                 scalar rho = gasProps->rho(p, T);
-                dh = gasProps->Hs(p, T) - Hs;
-                p -= rho*dh;
+                scalar dh = gasProps->Hs(p, T) - Hs;
+                dp = rho*dh;
+                p -= dp;
                 
                 if (iter++ > maxIter)
                 {
@@ -204,7 +204,7 @@ void Foam::isentropicTemperatureFvPatchScalarField::updateCoeffs()
                             << abort(FatalError);
                 }
                 
-            } while ( mag(dh) > hTol );
+            } while ( mag(dp) > pTol );
             Tp[faceI] = T;
         }
         else
