@@ -34,8 +34,8 @@ License
 #include "totalTemperatureFvPatchScalarField.H"
 #include "subsonicInletTotalFvPatchVectorField.H"
 #include "myPressureDirectedInletVelocityFvPatchVectorField.H"
-#include "isentropicInletPressureFvPatchScalarField.H"
-#include "isentropicInletTemperatureFvPatchScalarField.H"
+#include "isentropicPressureFvPatchScalarField.H"
+#include "isentropicTemperatureFvPatchScalarField.H"
 #include "isentropicInletVelocityFvPatchVectorField.H"
 #include "psiThermo.H"
 
@@ -210,16 +210,16 @@ bool Foam::functionObjects::mixingInterface::execute()
             auto& pp = refCast<totalPressureFvPatchScalarField>(pb[downstreamPatchID_]);
             p0Ptr = &pp.p0();
         }
-        else if (pb[downstreamPatchID_].type() == "isentropicInletPressure")
+        else if (pb[downstreamPatchID_].type() == "isentropicPressure")
         {
-            auto& pp = refCast<isentropicInletPressureFvPatchScalarField>(pb[downstreamPatchID_]);
+            auto& pp = refCast<isentropicPressureFvPatchScalarField>(pb[downstreamPatchID_]);
             p0Ptr = &pp.p0();
         }
 	else 
 	{
             FatalErrorIn("mixingInterface::execute()") 
                 << "the mixing interface works only with totalPressure "
-                << "or isentropicInletPressure boundary conditions!"
+                << "or isentropicPressure boundary conditions!"
                 << abort(FatalError);
         }        
         auto& p0 = *p0Ptr;
@@ -252,16 +252,16 @@ bool Foam::functionObjects::mixingInterface::execute()
             auto& pT = refCast<totalTemperatureFvPatchScalarField>(Tb[downstreamPatchID_]);
             T0Ptr = &pT.T0();
         }
-        else if (Tb[downstreamPatchID_].type() == "isentropicInletTemperature")
+        else if (Tb[downstreamPatchID_].type() == "isentropicTemperature")
         {
-            auto& pT = refCast<isentropicInletTemperatureFvPatchScalarField>(Tb[downstreamPatchID_]);
+            auto& pT = refCast<isentropicTemperatureFvPatchScalarField>(Tb[downstreamPatchID_]);
             T0Ptr = &pT.T0();
         }
 	else 
 	{
             FatalErrorIn("mixingInterface::execute()") 
                 << "the mixing interface works only with totalTemperature "
-                << "or isentropicInletTemperature boundary conditions!"
+                << "or isentropicTemperature boundary conditions!"
                 << abort(FatalError);
         }
         

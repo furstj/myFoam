@@ -31,10 +31,9 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "isentropicInletPressureFvPatchScalarField.H"
-#include "isentropicInletTemperatureFvPatchScalarField.H"
+#include "isentropicTemperatureFvPatchScalarField.H"
+// #include "inletOutletTotalTemperatureFvPatchScalarField.H"
 #include "psiThermo.H"
-#include "gasProperties.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,7 +45,6 @@ isentropicInletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
-    pName_("p"),
     TName_("T"),
     inletDir_(p.size())
 {
@@ -66,7 +64,6 @@ isentropicInletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
-    pName_(ptf.pName_),
     TName_(ptf.TName_),
     inletDir_(ptf.inletDir_, mapper)
 {}
@@ -81,7 +78,6 @@ isentropicInletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
-    pName_(dict.getOrDefault<word>("p", "p")),
     TName_(dict.getOrDefault<word>("T", "T")),
     inletDir_("inletDirection", dict, p.size())
 {
@@ -100,7 +96,6 @@ isentropicInletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(pivpvf),
-    pName_(pivpvf.pName_),
     TName_(pivpvf.TName_),
     inletDir_(pivpvf.inletDir_)
 {}
@@ -114,7 +109,6 @@ isentropicInletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(pivpvf, iF),
-    pName_(pivpvf.pName_),
     TName_(pivpvf.TName_),
     inletDir_(pivpvf.inletDir_)
 {}
@@ -159,61 +153,85 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    
     const fvMesh& mesh = patch().boundaryMesh().mesh();
 
     const auto& thermo =
         mesh.lookupObject<psiThermo>("thermophysicalProperties");
 
-    autoPtr<gasProperties> gasProps(gasProperties::New(thermo));
-    
-    const fvPatchScalarField& pp = 
-        patch().patchField<volScalarField, scalar>(
-            db().lookupObject<volScalarField>(pName_)
-        );
-    const_cast<fvPatchScalarField&>(pp).evaluate();
-    
+    // Need R of the free-stream flow.  Assume R is independent of location
+    // along patch so use face 0
+    label cellI = patch().faceCells()[0];
+    scalar Cp = thermo.Cp()()[cellI];
+    scalar Cv = thermo.Cv()()[cellI];
+    scalar R = Cp - Cv;
+    scalar gamma = Cp / Cv;
+
+    const volScalarField& T = 
+        db().lookupObject<volScalarField>(TName_);
+
     const fvPatchScalarField& pT = 
-        patch().patchField<volScalarField, scalar>(
-            db().lookupObject<volScalarField>(TName_)
-        );
+        patch().patchField<volScalarField, scalar>(T);
 
-
-    scalarField T0, p0;
-    if (pT.type() == "isentropicInletTemperature" && pp.type() == "isentropicInletPressure")
+    scalarField pT0;
+    if (pT.type() == "isentropicTemperature")
     {
-        T0 = refCast<const isentropicInletTemperatureFvPatchScalarField>(pT).T0();
-        p0 = refCast<const isentropicInletPressureFvPatchScalarField>(pp).p0();
+        pT0 = refCast<const isentropicTemperatureFvPatchScalarField>(pT).T0();
     }
     else
     {
         FatalErrorIn("isentropicInletVelocityFvPatchVectorField::updateCoeffs()") 
             << "the isentropicInletVelocity has to be combined with "
-            << "isentropicInletTemperature and isentropicInletPressure conditions!"
+            << "isentropicTemperature condition!"
             << abort(FatalError);
     }
+
+    const vectorField& Uint = internalField();
+    const scalarField& Tint = T.internalField();
+
+    const vectorField& pSf = patch().Sf();
 
     vectorField& refValue = this->refValue();
     scalarField& valFraction = this->valueFraction();
 
-    forAll(refValue, faceI) {
+    forAll(pSf, faceI) {
+        // Inward normal
+        vector n = -pSf[faceI] / mag(pSf[faceI]);
         vector dir = inletDir_[faceI] / mag(inletDir_[faceI]);
+	
+        label faceCellI = patch().faceCells()[faceI];
 
-        scalar S = gasProps->S(p0[faceI], T0[faceI]);
-        scalar p = min(pp[faceI], p0[faceI]);
-        scalar T = gasProps->TpS(p, S, pT[faceI]);
-
-        scalar h  = gasProps->Hs(p, T);
-        scalar H0 = gasProps->Hs(p0[faceI], T0[faceI]);
-
-        scalar uMag = sqrt(2*max(H0 - h, 0.0));
+        // Total temperature
+        scalar T0 = pT0[faceI];
         
-        refValue[faceI] = dir*uMag;
-        valFraction[faceI] = pos0(H0-h);
-    }
+        // Normal velocity in the inner cell (inward normal)
+        scalar u1 = n & Uint[faceCellI];
 
-    mixedFvPatchVectorField::updateCoeffs();
+        // Sound speed in the inner cell
+        scalar c1 = sqrt(gamma*R*Tint[faceCellI]);
+	
+        // Riemann invariant
+        scalar Rm = u1 - 2*c1/(gamma-1);
+	
+	// Calculate sound speed at the boundary via quadratic eq.
+        scalar cb;
+        scalar oneByCos = 1 / (n & dir);
+        {
+	  scalar tmp= oneByCos*oneByCos; 
+	  scalar a = 1+2.0/(gamma-1)*tmp;
+	  scalar b = 2*tmp*Rm;
+	  
+	  scalar c = (gamma-1)/2.*tmp*Rm*Rm - gamma*R*T0;
+	  //Perr << a << "\t" << b << "\t" << c << "\t" << b*b-4*a*c << endl;
+	  cb = (-b+sqrt(max(b*b-4*a*c,0.0)))/(2*a);
+        }
+        
+        scalar ub = 2*cb/(gamma-1) + Rm;
+        scalar uMag = ub * oneByCos;
+        refValue[faceI] = dir*uMag;
+        valFraction[faceI] = pos0(ub);
+    }
     
+    mixedFvPatchVectorField::updateCoeffs();
 }
 
 
@@ -224,10 +242,8 @@ void Foam::isentropicInletVelocityFvPatchVectorField::write
 {
     fvPatchVectorField::write(os);
 #if (OPENFOAM_PLUS>=1712 || OPENFOAM >= 1812)
-    os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
  #else
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
  #endif
 #if (OPENFOAM >= 1812)

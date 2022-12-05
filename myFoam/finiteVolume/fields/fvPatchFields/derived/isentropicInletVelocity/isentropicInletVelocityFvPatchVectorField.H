@@ -24,29 +24,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isentropicInletPressure
+    Foam::isentropicInletVelocity
 
 Description
-    isentropicInletPressure implements a boundary condition for p with
-    given total temperature.
+    isentropicInletVelocity implements a boundary condition for U with
+    given total temperature and given direction.  
 
-    The static pressure is extrapolated from the internall cell, i.e. it is
-    equivalent to zeroGradient condition. However, it stores the value of 
-    (isentropic) total pressure for boundary conditions for U and T. 
+    The boundary value of velosity is computed using Riemann
+    invariant going along the outward directed characteristics 
+    (see e.g. Blazek)
 
-    The boundary condition is compatible with real gas model with should be used in
-    cooperation with isentropicInletVelocity and isentropicInletTemperature.
+    The boundary condition is valid only for compressible ideal gas and it is
+    compatible with totalTemperature for T and totalPressure for p.
 
 See also
-    Foam::mixedFvPatchScalarField
+    Foam::mixedFvPatchVectorField
 
 SourceFiles
-    isentropicInletPressureFvPatchScalarField.C
+    isentropicInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isentropicInletPressureFvPatchScalarField_H
-#define isentropicInletPressureFvPatchScalarField_H
+#ifndef isentropicInletVelocityFvPatchVectorField_H
+#define isentropicInletVelocityFvPatchVectorField_H
 
 #include "fvPatchFields.H"
 #include "mixedFvPatchFields.H"
@@ -57,64 +57,69 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-    Class isentropicInletPressureFvPatchScalarField Declaration
+    Class isentropicInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class isentropicInletPressureFvPatchScalarField
+class isentropicInletVelocityFvPatchVectorField
 :
-    public mixedFvPatchScalarField
+    public mixedFvPatchVectorField
 {
     // Private data
 
-    //- Total pressure
-    scalarField p0_;
+        //- Temperature field name
+        word TName_;
+
+       
+        //- Inlet direction
+        vectorField inletDir_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("isentropicInletPressure");
+    TypeName("isentropicInletVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        isentropicInletPressureFvPatchScalarField
+        isentropicInletVelocityFvPatchVectorField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        isentropicInletPressureFvPatchScalarField
+        isentropicInletVelocityFvPatchVectorField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
         //- Construct by mapping given
-        //  isentropicInletPressureFvPatchScalarField
+        //  isentropicInletVelocityFvPatchVectorField
         //  onto a new patch
-        isentropicInletPressureFvPatchScalarField
+        isentropicInletVelocityFvPatchVectorField
         (
-            const isentropicInletPressureFvPatchScalarField&,
+            const isentropicInletVelocityFvPatchVectorField&,
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        isentropicInletPressureFvPatchScalarField
+        isentropicInletVelocityFvPatchVectorField
         (
-            const isentropicInletPressureFvPatchScalarField&
+            const isentropicInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
+        virtual tmp<fvPatchVectorField> clone() const
         {
-            return tmp<fvPatchScalarField>
+            return tmp<fvPatchVectorField>
             (
-                new isentropicInletPressureFvPatchScalarField
+                new isentropicInletVelocityFvPatchVectorField
                 (
                     *this
                 )
@@ -122,21 +127,21 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        isentropicInletPressureFvPatchScalarField
+        isentropicInletVelocityFvPatchVectorField
         (
-            const isentropicInletPressureFvPatchScalarField&,
-            const DimensionedField<scalar, volMesh>&
+            const isentropicInletVelocityFvPatchVectorField&,
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchScalarField> clone
+        virtual tmp<fvPatchVectorField> clone
         (
-            const DimensionedField<scalar, volMesh>& iF
+            const DimensionedField<vector, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchScalarField>
+            return tmp<fvPatchVectorField>
             (
-                new isentropicInletPressureFvPatchScalarField
+                new isentropicInletVelocityFvPatchVectorField
                 (
                     *this,
                     iF
@@ -158,14 +163,26 @@ public:
 
         // Access
 
-	    const scalarField& p0() const
+            //- Return the name of T
+            const word& TName() const
             {
-                return p0_;
+                return TName_;
             }
 
-	    scalarField& p0() 
+            //- Return reference to the name of T to allow adjustment
+            word& TName()
             {
-                return p0_;
+                return TName_;
+            }
+
+            const vectorField& inletDirection() const
+            {
+		return inletDir_;
+            }
+
+	    vectorField& inletDirection() 
+            {
+                return inletDir_;
             }
 
         // Mapping functions
@@ -179,7 +196,7 @@ public:
             //- Reverse map the given fvPatchField onto this fvPatchField
             virtual void rmap
             (
-                const fvPatchScalarField&,
+                const fvPatchVectorField&,
                 const labelList&
             );
 
@@ -191,6 +208,9 @@ public:
         virtual void write(Ostream&) const;
 
 
+    // Member operators
+
+        virtual void operator=(const fvPatchField<vector>& pvf);
 };
 
 

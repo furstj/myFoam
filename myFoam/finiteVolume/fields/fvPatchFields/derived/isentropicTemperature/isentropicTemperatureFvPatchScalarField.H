@@ -24,29 +24,44 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isentropicInletTemperature
+    Foam::isentropicTemperatureFvPatchScalarField
+
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
-    isentropicInletTemperature implements a boundary condition for U with
-    given total temperature, total pressure and flof direction.  
+    This boundary condition provides a total temperature condition calculated using real gas relations.
 
-    The value is calculated with real gas formulas using extrapolated pressure.
+Usage
+    \table
+        Property     | Description             | Required    | Default value
+        p            | Pressure field name     | no          | p
+        U            | Velocity field name     | no          | U
+        phi          | Flux field name         | no          | phi
+        T0           | total temperature       | yes         |
+    \endtable
 
-    The boundary condition should be used in combination with isentropicInletPressure 
-    and isentropicInletTemperature.
-
-See also
-    Foam::fixedValueFvPatchScalarField
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        type            isentropicTemperature;
+        gamma           1.4;
+        T0              uniform 800;
+    }
+    \endverbatim
 
 SourceFiles
-    isentropicInletTemperatureFvPatchScalarField.C
+    isentropicTemperatureFvPatchScalarField.C
+
+See also
+    Foam::fixedValueFvPatchField
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isentropicInletTemperatureFvPatchScalarField_H
-#define isentropicInletTemperatureFvPatchScalarField_H
+#ifndef isentropicTemperatureFvPatchScalarField_H
+#define isentropicTemperatureFvPatchScalarField_H
 
-#include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,59 +70,65 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-    Class isentropicInletTemperatureFvPatchScalarField Declaration
+             Class isentropicTemperatureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class isentropicInletTemperatureFvPatchScalarField
+class isentropicTemperatureFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
     // Private data
 
-        //- Pressure field name
+        //- Name of the pressure field
         word pName_;
 
-        //- Total temperature field
+        //- Name of the velocity field
+        word UName_;
+
+        //- Name of the flux transporting the field
+        word phiName_;
+
+        //- Total temperature
         scalarField T0_;
-       
+
+
 public:
 
     //- Runtime type information
-    TypeName("isentropicInletTemperature");
+    TypeName("isentropicTemperature");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        isentropicInletTemperatureFvPatchScalarField
+        isentropicTemperatureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        isentropicInletTemperatureFvPatchScalarField
+        isentropicTemperatureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        //  isentropicInletTemperatureFvPatchScalarField
+        //- Construct by mapping given isentropicTemperatureFvPatchScalarField
         //  onto a new patch
-        isentropicInletTemperatureFvPatchScalarField
+        isentropicTemperatureFvPatchScalarField
         (
-            const isentropicInletTemperatureFvPatchScalarField&,
+            const isentropicTemperatureFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        isentropicInletTemperatureFvPatchScalarField
+        isentropicTemperatureFvPatchScalarField
         (
-            const isentropicInletTemperatureFvPatchScalarField&
+            const isentropicTemperatureFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -115,17 +136,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new isentropicInletTemperatureFvPatchScalarField
-                (
-                    *this
-                )
+                new isentropicTemperatureFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        isentropicInletTemperatureFvPatchScalarField
+        isentropicTemperatureFvPatchScalarField
         (
-            const isentropicInletTemperatureFvPatchScalarField&,
+            const isentropicTemperatureFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -137,46 +155,23 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new isentropicInletTemperatureFvPatchScalarField
-                (
-                    *this,
-                    iF
-                )
+                new isentropicTemperatureFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        // Attributes
-
-            //- Return true: this patch field is altered by assignment
-            virtual bool assignable() const
-            {
-                return true;
-            }
-
-
         // Access
 
-            //- Return the name of p
-            const word& pName() const
-            {
-                return pName_;
-            }
-
-            //- Return the name of p
-            word& pName()
-            {
-                return pName_;
-            }
-
+            //- Return the total pressure
             const scalarField& T0() const
             {
                 return T0_;
             }
 
-            scalarField& T0() 
+            //- Return reference to the total pressure to allow adjustment
+            scalarField& T0()
             {
                 return T0_;
             }
@@ -198,13 +193,14 @@ public:
             );
 
 
-        //- Evaluate the patch field
-        virtual void updateCoeffs();
+        // Evaluation functions
+
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;
-
-
 };
 
 
