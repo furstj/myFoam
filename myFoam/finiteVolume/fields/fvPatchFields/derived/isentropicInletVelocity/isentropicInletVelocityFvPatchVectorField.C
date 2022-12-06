@@ -233,11 +233,12 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         scalar Tb = pT[faceI];
         label iter = 0;
         const label maxIter = 100;
-        const scalar pTol = 1.e-5*pb;
+        const scalar pTol = 1.e-6*pb;
         scalar dp, dH, ub;
         do
         {
             ub = u1 + (pb - p1)/(rho1*c1);
+            ub = max(ub, 0.0);
             Tb = gasProps->TpS(pb, S, Tb);
             dH = H0 - gasProps->Hs(pb, Tb) - 0.5*sqr(ub*oneByCos);
             dp = dH/(1/gasProps->rho(pb,Tb) + ub*sqr(oneByCos)/(rho1*c1));
