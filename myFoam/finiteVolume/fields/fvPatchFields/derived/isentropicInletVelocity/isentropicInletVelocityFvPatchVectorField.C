@@ -213,7 +213,17 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         const scalar p0 = pp0[faceI];
         const scalar S  = gasProps->S(p0, T0);
         const scalar H0 = gasProps->Hs(p0, T0);
-        
+
+        // Pressure extrapolation
+        const scalar pb = pint[faceCellI];
+        const scalar Tb = gasProps->TpS(pb, S, pT[faceI]);
+        const scalar hb = gasProps->Hs(pb, Tb);
+        const scalar magU = sqrt(2*max(H0 - hb, 0.0));
+
+        refValue[faceI] = dir*magU;
+        valFraction[faceI] = pos0(H0 - hb);
+
+        /*
         // Normal velocity in the inner cell (inward normal)
         const scalar u1 = n & Uint[faceCellI];
 
@@ -273,6 +283,7 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         scalar uMag = ub * oneByCos;
         refValue[faceI] = dir*uMag;
         valFraction[faceI] = pos0(ub);
+            */
     }
     
     mixedFvPatchVectorField::updateCoeffs();
