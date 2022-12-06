@@ -192,18 +192,16 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
             << abort(FatalError);
     }
 
-    const vectorField& Uint = internalField();
-    const scalarField& Tint = T.internalField();
     const scalarField& pint = p.internalField();
-
+    const scalarField& Tint = T.internalField();
+    const vectorField& Uint = internalField();
+    
     const vectorField& pSf = patch().Sf();
 
     vectorField& refValue = this->refValue();
     scalarField& valFraction = this->valueFraction();
 
     forAll(pSf, faceI) {
-        // Inward normal
-        const vector n = -pSf[faceI] / mag(pSf[faceI]);
         const vector dir = inletDir_[faceI] / mag(inletDir_[faceI]);
 	
         label faceCellI = patch().faceCells()[faceI];
@@ -214,76 +212,54 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         const scalar S  = gasProps->S(p0, T0);
         const scalar H0 = gasProps->Hs(p0, T0);
 
+        /*
         // Pressure extrapolation
         const scalar pb = pint[faceCellI];
         const scalar Tb = gasProps->TpS(pb, S, pT[faceI]);
         const scalar hb = gasProps->Hs(pb, Tb);
         const scalar magU = sqrt(2*max(H0 - hb, 0.0));
+            
+            */
 
-        refValue[faceI] = dir*magU;
-        valFraction[faceI] = pos0(H0 - hb);
-
-        /*
-        // Normal velocity in the inner cell (inward normal)
-        const scalar u1 = n & Uint[faceCellI];
-
-        // Sound speed and density in the inner cell
+        // Inward normal
+        const vector n = -pSf[faceI] / mag(pSf[faceI]);
+        const scalar oneByCos = 1 / (n & dir);
         const scalar p1 = pint[faceCellI];
-        const scalar T1 = Tint[faceCellI]; 
-        const scalar c1   = gasProps->c(p1, T1);
-        const scalar rho1 = gasProps->rho(p1, T1);
-
-        // Calculation using Riemann invariant:
-        // 0 = dRminus = (ub - u1) - \int_{\rho_1}^{\rho_b} c(\rho,S)/rho \, d\rho
-        //
-        // integral is approximated using trapezoidal rule:
-        // u_b = u_1 - 0.5*(c1/rho1 + cb/rhob)*(rho1 - rhob)
-
+        const scalar u1 = n & Uint[faceCellI];
+        const scalar c1 = gasProps->c(pint[faceCellI], Tint[faceCellI]);
+        const scalar rho1 = gasProps->rho(pint[faceCellI], Tint[faceCellI]);
+        
         scalar pb = pp[faceI];
         scalar Tb = pT[faceI];
-        scalar cb = gasProps->c(pb, Tb);
-        scalar rhob = gasProps->rho(pb, Tb);
-        scalar oneByCos = 1 / (n & dir);
-        
-        scalar ub = u1;
-        scalar dp;
-
-        const label maxIter = 100;
         label iter = 0;
-        scalar pTol = 1.e-5*p1;
-
-        scalarList dphist(maxIter);
-        
+        const label maxIter = 100;
+        const scalar pTol = 1.e-5*pb;
+        scalar dp, dH, ub;
         do
         {
-            ub = u1 - 0.5*(c1/rho1 + cb/rhob)*(rho1 - rhob);
-            scalar h = H0 - 0.5*sqr(ub*oneByCos);
-            scalar dh = h - gasProps->Hs(pb, Tb);
-            dp = 0.5*rhob*dh;
-            pb += dp;
+            ub = u1 + (pb - p1)/(rho1*c1);
             Tb = gasProps->TpS(pb, S, Tb);
-            rhob = gasProps->rho(pb, Tb);
-            cb = gasProps->c(pb, Tb);
-            dphist[iter] = dp;
+            dH = H0 - gasProps->Hs(pb, Tb) - 0.5*sqr(ub*oneByCos);
+            dp = dH/(1/gasProps->rho(pb,Tb) + ub*sqr(oneByCos)/(rho1*c1));
+            pb += dp;
+            //Info << iter << " ub  " << ub << "  dp  " << dp << nl;
             if (iter++ > maxIter)
             {
                 FatalErrorInFunction
-                    << "Maximum number of iterations exceeded: " << maxIter << nl
-                        << " T  : " << T1 << "  ... " << Tb << nl
-                        << " p  : " << p1 << "  ... " << pb << nl
-                        << " ub : " << u1 << "  ... " << ub << nl
-                        << " S  : " << S << nl
-                        << " h  : " << h << "  dh   " << dh << nl
-                        << " p  : " << pb << "  dp   " << dp << nl
-                        << " history  : " << dphist << nl
+                    << "Maximum number of iterations exceeded: " << maxIter
+                        << " when starting from p:" << pp[faceI] << nl
+                        << " T  : " << Tb << nl
+                        << " p  : " << pb << nl
+                        << " ub  : " << ub << nl
+                        << " dp  : " << dp << nl
+                        << " dH  : " << dH << nl
+                        << " tol: " << pTol
                         << abort(FatalError);
-            }           
+            }
         } while (mag(dp) > pTol);
         
-        scalar uMag = ub * oneByCos;
-        refValue[faceI] = dir*uMag;
+        refValue[faceI] = dir*ub*oneByCos;
         valFraction[faceI] = pos0(ub);
-            */
     }
     
     mixedFvPatchVectorField::updateCoeffs();

@@ -38,6 +38,7 @@ License
 #include "isentropicTemperatureFvPatchScalarField.H"
 #include "isentropicInletVelocityFvPatchVectorField.H"
 #include "psiThermo.H"
+#include "gasProperties.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -183,20 +184,29 @@ bool Foam::functionObjects::mixingInterface::execute()
 
     const auto& thermo =
         mesh().lookupObject<psiThermo>("thermophysicalProperties");
-    label cellI = p.boundaryField()[upstreamPatchID_].patch().faceCells()[0];
-    scalar Cp = thermo.Cp()()[cellI];
-    scalar Cv = thermo.Cv()()[cellI];
-    scalar R = Cp - Cv;
-    scalar gamma = Cp / Cv;
-
-
-    // Total pressure to downstream
+    autoPtr<gasProperties> gasProps(gasProperties::New(thermo));
+    
+    // Total pressure and total temperature to downstream
     {
-        scalarField MaUp = mag(UUp)/sqrt(gamma*R*TUp);
-        scalarField pTotUp = pUp*pow(1 + (gamma-1)/2*sqr(MaUp), gamma/(gamma-1));
+        scalarField pTot(pUp.size(), Zero);
+        scalarField TTot(pUp.size(), Zero);
+        
+        forAll(pUp, faceI)
+        {
+            scalar S  = gasProps->S(pUp[faceI], TUp[faceI]);
+            scalar H0 = gasProps->Hs(pUp[faceI], TUp[faceI]) + 0.5*magSqr(UUp[faceI]);
+            pTot[faceI] = gasProps->pHS(H0, S, pUp[faceI]);
+            TTot[faceI] = gasProps->TpS(pTot[faceI], S, TUp[faceI]);
+        }
         
         List<scalar> pTotAvgUp = getScalarAverages(
-            pTotUp,
+            pTot,
+            mesh().magSf().boundaryField()[upstreamPatchID_],
+            mesh().Cf().boundaryField()[upstreamPatchID_]
+        );
+
+        List<scalar> TTotAvgUp = getScalarAverages(
+            TTot,
             mesh().magSf().boundaryField()[upstreamPatchID_],
             mesh().Cf().boundaryField()[upstreamPatchID_]
         );
@@ -229,18 +239,6 @@ bool Foam::functionObjects::mixingInterface::execute()
             vector x = mesh().Cf().boundaryField()[downstreamPatchID_][i];
             p0[i] = (1 - relax_)*p0[i] + relax_*interpolateScalar(pTotAvgUp, parameter_(x));
         }
-    }
-        
-    // Total temperature to downstream
-    {
-        scalarField MaUp = mag(UUp)/sqrt(gamma*R*TUp);
-        scalarField TTotUp = TUp*(1 + (gamma-1)/2*sqr(MaUp));
-        
-        List<scalar> TTotAvgUp = getScalarAverages(
-            TTotUp,
-            mesh().magSf().boundaryField()[upstreamPatchID_],
-            mesh().Cf().boundaryField()[upstreamPatchID_]
-        );
 
         volScalarField::Boundary& Tb =
             const_cast<volScalarField*>(&T)->boundaryFieldRef();

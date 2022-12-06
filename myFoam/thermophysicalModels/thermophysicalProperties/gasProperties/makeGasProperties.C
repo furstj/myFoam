@@ -188,11 +188,11 @@ makeGasProperties(
     template<>                                                             \
     scalar genericGasProperties<                                           \
         Transport<species::thermo<hConstThermo<perfectGas<specie>>,Type>>  \
-    >::pEs(const scalar Es, const scalar rho, const scalar T0) const       \
+    >::pEs(const scalar Es, const scalar rho, const scalar p0) const       \
     {                                                                      \
-	const scalar pRef = 1.e5;                                          \
-        scalar Eref = this->Es(pRef,T0);                                   \
-        scalar T = T0 + (Es - Eref)/Cv(pRef,T0);                           \
+	const scalar Tref = 288.15;                                        \
+        scalar Eref = this->Es(p0,Tref);                                   \
+        scalar T = Tref + (Es - Eref)/Cv(p0,Tref);                         \
         return rho*R()*T;                                                  \
     }                                                                      \
                                                                            \

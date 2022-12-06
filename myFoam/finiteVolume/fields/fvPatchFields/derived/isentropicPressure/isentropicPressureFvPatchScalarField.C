@@ -177,37 +177,11 @@ void Foam::isentropicPressureFvPatchScalarField::updateCoeffs
     
     forAll(Tp, faceI)
     {
-        scalar S  = gasProps->S(p0p[faceI], T0[faceI]);
-        scalar Hs = gasProps->Hs(p0p[faceI], T0[faceI]) - 0.5*magSqr(Up[faceI]);
-        scalar p = pp[faceI];
-        scalar T = Tp[faceI];
-
-        const label maxIter = 100;
-        label iter = 0;
-        scalar pTol = 1.e-6*p;
-        scalar dp;
-
         if (phip[faceI] < 0)
         {
-            do
-            {
-                T = gasProps->TpS(p, S, T);
-                scalar rho = gasProps->rho(p, T);
-                scalar dh = gasProps->Hs(p, T) - Hs;
-                dp = rho*dh;
-                p -= dp;
-                
-                if (iter++ > maxIter)
-                {
-                    FatalErrorInFunction
-                        << "Maximum number of iterations exceeded: " << maxIter
-                            << " T  : " << T
-                            << " p  : " << p
-                            << abort(FatalError);
-                }
-                
-            } while ( mag(dp) > pTol );
-            pp[faceI] = p;
+            scalar S  = gasProps->S(p0p[faceI], T0[faceI]);
+            scalar Hs = gasProps->Hs(p0p[faceI], T0[faceI]) - 0.5*magSqr(Up[faceI]);
+            pp[faceI] = gasProps->pHS(Hs, S, pp[faceI]);
         }
         else
         {

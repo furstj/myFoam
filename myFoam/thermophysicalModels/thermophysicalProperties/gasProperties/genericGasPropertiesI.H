@@ -191,48 +191,11 @@ scalar genericGasProperties<TransportModel>::TEa(const scalar Ea, const scalar p
 }
 
 template<typename TransportModel>
-scalar genericGasProperties<TransportModel>::pEs(const scalar Es, const scalar rho, const scalar T0)
-    const
-{
-    scalar T = T0;
-    scalar p = rho*R()*T;   // Estimate from perfect gas!
-    const scalar tol = 1.e-5;
-    const label maxIter = 100;
-
-    const scalar TTol = T*tol;
-    const scalar pTol = p*tol;
-    
-    label iter = 0;
-    scalar dT, dp;
-    
-    do
-    {
-        dT = (Es - this->Es(p, T))/ this->Cv(p,T);
-        dp = this->Z(p,T)*R()*rho*dT;
-        T += dT;
-        p += dp;
-
-        if (iter++ > maxIter)
-        {
-            FatalErrorInFunction
-                << "Maximum number of iterations exceeded: " << maxIter
-                << " when starting from T0:" << T0
-                << " T  : " << T
-                << " p  : " << p
-                << " tol: " << tol
-                << abort(FatalError);
-        }
-    } while ( (mag(dT) > TTol) || (mag(dp) > pTol) );
-    return p;
-}
-
-
-template<typename TransportModel>
 scalar genericGasProperties<TransportModel>::TpS(const scalar p, const scalar S, const scalar T0)
     const
 {
     scalar T = T0;
-    const scalar tol = 1.e-5;
+    const scalar tol = 1.e-8;
     const label maxIter = 100;
 
     const scalar TTol = T*tol;
@@ -258,6 +221,79 @@ scalar genericGasProperties<TransportModel>::TpS(const scalar p, const scalar S,
         }
     } while ( mag(dT) > TTol);
     return T;
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::pEs(const scalar Es, const scalar rho, const scalar p0)
+    const
+{
+    scalar p = p0;
+    scalar T = p0/(rho*R());   // Estimate from perfect gas!
+    const scalar tol = 1.e-8;
+    const label maxIter = 100;
+
+    const scalar TTol = T*tol;
+    const scalar pTol = p*tol;
+    
+    label iter = 0;
+    scalar dT, dp;
+    
+    do
+    {
+        dT = (Es - this->Es(p, T))/ this->Cv(p,T);
+        dp = this->Z(p,T)*R()*rho*dT;
+        T += dT;
+        p += dp;
+
+        if (iter++ > maxIter)
+        {
+            FatalErrorInFunction
+                << "Maximum number of iterations exceeded: " << maxIter
+                << " when starting from p0:" << p0
+                << " T  : " << T
+                << " p  : " << p
+                << " tol: " << tol
+                << abort(FatalError);
+        }
+    } while ( (mag(dT) > TTol) || (mag(dp) > pTol) );
+    return p;
+}
+
+
+template<typename TransportModel>
+scalar genericGasProperties<TransportModel>::pHS(const scalar Hs, const scalar S, const scalar p0)
+    const
+{
+    const scalar tol = 1.e-8;
+    const label maxIter = 100;
+
+    const scalar pTol = p0*tol;
+    scalar T = THs(Hs, p0, 288.15);
+    
+    label iter = 0;
+    scalar dp;
+    scalar p = p0;
+    do
+    {
+        T = TpS(p, S, T);
+        scalar dh = Hs - this->Hs(p, T);
+        scalar rho = this->rho(p, T);
+        dp = rho*dh;
+        p += dp;
+
+        if (iter++ > maxIter)
+        {
+            FatalErrorInFunction
+                << "Maximum number of iterations exceeded: " << maxIter
+                << " when starting from p0:" << p0
+                << " T  : " << T
+                << " p  : " << p
+                << " tol: " << tol
+                << abort(FatalError);
+        }
+    } while ( mag(dp) > pTol);
+    return p;
 }
 
 

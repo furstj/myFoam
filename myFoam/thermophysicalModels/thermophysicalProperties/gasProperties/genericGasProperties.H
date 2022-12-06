@@ -151,11 +151,14 @@ public:
     //- Temperature from absolute internal energy given an initial T0
     virtual scalar TEa(const scalar Ea, const scalar p, const scalar T0) const;
     
-    //- Pressure from sensible internal energy and density given an initial T0
-    virtual scalar pEs(const scalar Es, const scalar rho, const scalar T0) const;
-    
     //- Temperature from pressure and entropy given an initial T0
     virtual scalar TpS(const scalar p, const scalar S, const scalar T0) const;
+    
+    //- Pressure from sensible internal energy and density given an initial p0
+    virtual scalar pEs(const scalar Es, const scalar rho, const scalar p0) const;
+    
+    //- Pressure from sensible enthalyp and entropy given an initial p0
+    virtual scalar pHS(const scalar Hs, const scalar S, const scalar p0) const;
     
 
     // Physical properties

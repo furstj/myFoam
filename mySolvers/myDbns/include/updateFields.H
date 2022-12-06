@@ -9,7 +9,7 @@
     
     forAll(h, cell)
     {
-        p[cell] = gasProps->pEs(e[cell], rho[cell], T[cell]);
+        p[cell] = gasProps->pEs(e[cell], rho[cell], p[cell]);
         h[cell] = e[cell] + p[cell]/rho[cell];
     }    
 
