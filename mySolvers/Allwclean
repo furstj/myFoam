@@ -9,5 +9,4 @@ wclean mySonicLiquidFoam
 wclean mySonicLiquidFoam/mySonicLiquidDyMFoam
 
 wclean myRhoSimpleFoam
-
 # ----------------------------------------------------------------- end-of-file
