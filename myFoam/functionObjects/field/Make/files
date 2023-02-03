@@ -1,5 +1,7 @@
 MachNoRG/MachNoRG.C
 entropyRG/entropyRG.C
 totalPressureRG/totalPressureRG.C
+totalEnthalpyRG/totalEnthalpyRG.C
+
 
 LIB = $(FOAM_USER_LIBBIN)/libmyfieldFunctionObjects
