@@ -174,6 +174,10 @@ public:
 
      //- Write the function coefficients
     virtual void writeData(Ostream& os) const;
+
+    //- Access to transport model
+    inline const TransportModel& transportModel() const
+    { return transport_; }
 };
 
 

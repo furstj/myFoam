@@ -30,8 +30,8 @@ mixture
 {
     CoolProp
     {
-        backend TTSE&HEOS;
-        fluid   N2;
+        backend HEOS;
+        fluid   Air;
     }
 }
 

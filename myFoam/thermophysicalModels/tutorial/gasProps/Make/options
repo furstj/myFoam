@@ -15,4 +15,4 @@ EXE_LIBS = \
     -lspecie \
     -lthermophysicalProperties \
     -lfiniteVolume \
-    -lmeshTools
+    -lmeshTools 

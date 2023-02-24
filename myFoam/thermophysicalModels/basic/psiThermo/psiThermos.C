@@ -46,6 +46,12 @@ License
 #include "hPolynomialThermo.H"
 #include "polynomialTransport.H"
 
+#ifdef COOLPROP
+#include "CoolPropTransport.H"
+#include "CoolPropThermo.H"
+#include "CoolPropGas.H"
+#endif
+
 #include "hePsiThermo.H"
 #include "pureMixture.H"
 
@@ -119,6 +125,19 @@ makeThermos
     specie
 );
 
+#ifdef COOLPROP
+makeThermos
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    CoolPropTransport,
+    sensibleEnthalpy,
+    CoolPropThermo,
+    CoolPropGas,
+    specie
+);
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

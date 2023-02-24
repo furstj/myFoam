@@ -4,6 +4,7 @@ The repository contains several additional solvers for OpenFOAM. There are
 several branches supporting different versions of OpenFOAM:
 
 - **master** development branch supporting recent OpenFOAM (Foundation and ESI)
+- **realGas** development branch with extended support of real gas
 - **OF6** branch for OpenFOAM 6 and OpenFOAM v1812
 - **OF5** branch for OpenFOAM 5
 
@@ -28,6 +29,18 @@ The installation is quite easy, just do
     ./Allwmake
 	cd ../mySolvers
 	./Allwmake
+
+## Real gas via CoolProp library
+The **realGas** branch optionally supports also *CoolProp* library. In order to compile the package with*CoolProp* one has to set *COOLPROP* environment variable before compilation, i.e.
+
+    cd myFoam
+    export COOLPROP=/path/to/coolprop
+    ./Allwmake
+
+The compilation then looks for includes in *$COOLPROP/include* and for shared library in *$COOLPROP/lib*.
+
+Note that the support for *CoolProp* is stiil highly experimental and the calculation is deadly slow when comparing with ideal gas or with cubic equation of state.
+
 
 # Tutorial case
 There is simple tutorial case in *tutorials/myLuSgsFoam*. Just run `./Allrun`

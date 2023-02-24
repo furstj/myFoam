@@ -1,4 +1,18 @@
+ifdef COOLPROP
+    CPMACRO=-DCOOLPROP=$(COOLPROP) 
+    CPMACRO+= -I$(COOLPROP)/externals/fmtlib
+    CPMACRO+= -I$(COOLPROP)/include 
+    CPMACRO+= -I./specie/equationOfState/CoolPropGas
+    CPMACRO+= -I./thermo/CoolPropThermo
+    CPMACRO+= -I./transport/CoolPropTransport/CoolPropTransport
+    CPLIBS=-L$(COOLPROP)/lib -lCoolProp -Wl,-rpath=$(COOLPROP)/lib
+else
+    CPMACRO=
+    CPLIBS=
+endif
+
 EXE_INC = \
+    $(CPMACRO) \
     -I./specie/equationOfState/AungierRedlichKwongGas \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
@@ -8,6 +22,7 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 LIB_LIBS = \
+    $(CPLIBS) \
     -lfluidThermophysicalModels \
     -lcompressibleTransportModels \
     -lspecie \

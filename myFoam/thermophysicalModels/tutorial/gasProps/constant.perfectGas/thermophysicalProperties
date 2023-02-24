@@ -19,19 +19,30 @@ thermoType
 {
     type            hePsiThermo;
     mixture         pureMixture;
-    transport       CoolProp;
-    thermo          CoolProp;
-    equationOfState CoolPropGas;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
     specie          specie;
     energy          sensibleEnthalpy;
 }
 
 mixture
 {
-    CoolProp
+    specie
     {
-        backend TTSE&HEOS;
-        fluid   N2;
+        nMoles      1;
+        molWeight   28.9652;
+    }
+    thermodynamics
+    {
+        Cp          1005;
+        Hf          0;
+    }
+    transport
+    {
+
+      mu            1.8e-5;
+      Pr            0.70;
     }
 }
 

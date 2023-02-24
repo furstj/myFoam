@@ -3,5 +3,4 @@ basic/psiThermo/psiThermos.C
 thermophysicalProperties/gasProperties/gasProperties.C
 thermophysicalProperties/gasProperties/makeGasProperties.C
 
-
 LIB = $(FOAM_USER_LIBBIN)/libmyThermophysicalModels

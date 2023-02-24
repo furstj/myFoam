@@ -43,6 +43,11 @@ License
 #include "hTabulatedThermo.H"
 #include "polynomialTransport.H"
 
+#ifdef COOLPROP
+#include "CoolPropTransport.H"
+#include "CoolPropThermo.H"
+#include "CoolPropGas.H"
+#endif
 
 namespace Foam
 {
@@ -143,6 +148,15 @@ makeGasProperties(
     specie
 );
 
+#ifdef COOLPROP
+makeGasProperties(
+    CoolPropTransport,
+    sensibleEnthalpy,
+    CoolPropThermo,
+    CoolPropGas,
+    specie
+);
+#endif
 
 // - Optimized gas properties
 
@@ -201,6 +215,23 @@ makeGasProperties(
 
 optimizePerfectGas(constTransport, sensibleEnthalpy);
 optimizePerfectGas(sutherlandTransport, sensibleEnthalpy);
+
+
+// =============== Optimization of CoolProp model =====================
+#ifdef COOLPROP
+
+template<> 
+scalar genericGasProperties<CoolPropTransport<
+    species::thermo<CoolPropThermo<CoolPropGas<specie>>,sensibleEnthalpy>>>::THs
+    (const scalar Hs, const scalar p, const scalar T0) const         	
+{                                                                      
+    auto state = this->transportModel().state();
+    state->update(CoolProp::HmassP_INPUTS, Hs, p);
+    return state->T();   
+} 
+
+
+#endif
 
 }
 
