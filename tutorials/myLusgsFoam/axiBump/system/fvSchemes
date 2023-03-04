@@ -1,0 +1,82 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.2                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dbnsFlux hllcLMFlux;
+//dbnsFlux betaFlux;
+//dbnsFlux AUSMplusUpFlux;
+
+AUSMplusUpFluxCoeffs {
+   MaInf 0.2;
+   printCoeffs true;
+}
+
+ddtSchemes
+{
+  default Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    limitedGauss    cellLimited Gauss linear 1;
+    limitedLSQR     cellLimited leastSquares 1;
+    venkatakrishnan cellLimited<Venkatakrishnan> Gauss linear 1;
+    grad(U) Gauss linear;
+    grad(h) Gauss linear;
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,k)      Gauss linearUpwind limitedGauss;
+    div(phi,omega)  Gauss linearUpwind limitedGauss;
+    div(devRhoReff) Gauss linear;
+    div((devRhoReff&U)) Gauss linear;
+
+    div((muEff*dev2(grad(U).T()))) Gauss linear;
+}
+
+laplacianSchemes
+{
+   // default         Gauss linear corrected;
+   default         Gauss linear limited corrected 0.5;
+}
+
+interpolationSchemes
+{
+    default        linear;
+    reconstruct(p) linearUpwind  venkatakrishnan; //limitedGauss; //upwind;
+    reconstruct(U) linearUpwindV venkatakrishnan; //limitedGauss; //upwind;
+    reconstruct(T) linearUpwind  venkatakrishnan; //limitedGauss; //upwind;
+}
+
+snGradSchemes
+{
+    // default         corrected;
+    default         limited corrected 0.5;
+}
+
+fluxRequired
+{
+    default         no;
+}
+
+wallDist {
+  method meshWave;
+}
+
+// ************************************************************************* //
