@@ -7,4 +7,5 @@ wclean myLusgsFoam/myLusgsDyMFoam
 
 wclean mySonicLiquidFoam
 
+wclean myRhoSimpleFoam
 # ----------------------------------------------------------------- end-of-file

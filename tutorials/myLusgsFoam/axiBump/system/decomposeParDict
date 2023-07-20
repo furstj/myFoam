@@ -1,0 +1,38 @@
+// The FOAM Project // File: decomposeParDict
+/*
+-------------------------------------------------------------------------------
+ =========         | dictionary
+ \\      /         | 
+  \\    /          | Name:   decomposeParDict
+   \\  /           | Family: FoamX configuration file
+    \\/            | 
+    F ield         | FOAM version: 2.1
+    O peration     | Product of Nabla Ltd.
+    A and          | 
+    M anipulation  | Email: Enquiries@Nabla.co.uk
+-------------------------------------------------------------------------------
+*/
+// FoamX Case Dictionary.
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            ".";
+    case            "AxiBump";
+    instance        "system";
+    local           "";
+
+    class           dictionary;
+    object          decomposeParDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+numberOfSubdomains 4;
+
+method scotch;
+
+// ************************************************************************* //

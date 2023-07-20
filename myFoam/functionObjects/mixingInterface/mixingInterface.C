@@ -78,7 +78,7 @@ Foam::functionObjects::mixingInterface::mixingInterface
     downstreamPatchID_(mesh().boundaryMesh().findPatchID(downstreamPatch_)),
     counter_(Zero)
 {
-    Info << "MIXINGINTERFACE CONSTRUCTOR" << endl;
+    //Info << "MIXINGINTERFACE CONSTRUCTOR" << endl;
     read(dict);
 
     axis_ /= mag(axis_);
@@ -146,7 +146,7 @@ Foam::functionObjects::mixingInterface::mixingInterface
     {
         scalar xi = -M_PI/2 + M_PI*scalar(i)/segments_;
         paramBins_[i] = parMin + (parMax - parMin)*(sin(xi)+1)/2;
-        Info << paramBins_[i] << nl;
+        //Info << paramBins_[i] << nl;
     }
 
 }
@@ -185,6 +185,7 @@ bool Foam::functionObjects::mixingInterface::execute()
     scalar Cv = thermo.Cv()()[cellI];
     scalar R = Cp - Cv;
     scalar gamma = Cp / Cv;
+
 
     // Total pressure to downstream
     {
@@ -278,7 +279,8 @@ bool Foam::functionObjects::mixingInterface::execute()
             vector vxy = v[0]*axis_ + v[1]*r + v[2]*t;
             vxy /= max(mag(vxy), 1.e-10);
             
-            inletDir[i] = (1 - relax_)*inletDir[i] + relax_*vxy/mag(vxy);
+            inletDir[i] = (1 - relax_)*inletDir[i] + relax_*vxy;
+            inletDir[i] /= mag(inletDir[i]);
 
             // Check if the direction goes into the domain
             vector n = mesh().Sf().boundaryField()[downstreamPatchID_][i];
@@ -434,8 +436,8 @@ Foam::label Foam::functionObjects::mixingInterface::getBin(scalar p) const
 {
     label i;
     for (i=1; i<=segments_; i++)
-        if (p < paramBins_[i]) break;
-    return i-1;
+        if (p < paramBins_[i]) return i-1;
+    return segments_-1;
 }
 
 Foam::scalar Foam::functionObjects::mixingInterface::interpolateScalar(
