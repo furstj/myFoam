@@ -42,6 +42,18 @@ volScalarField rho
     rhoO + psi*p
 );
 
+const volScalarField psiField
+(
+    IOobject
+    (
+        "psiField",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    psi * (rho/rho)
+);
 
 #include "compressibleCreatePhi.H"
 
@@ -69,6 +81,8 @@ autoPtr<incompressible::turbulenceModel> turbulence
 (
     incompressible::turbulenceModel::New(U, phiv, laminarTransport)
 );
+
+#include "createMRF.H"
 
 #include "createFvOptions.H"
 

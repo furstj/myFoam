@@ -1,3 +1,0 @@
-mySonicLiquidDyMFoam.C
-
-EXE = $(FOAM_USER_APPBIN)/mySonicLiquidDyMFoam
