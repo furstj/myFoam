@@ -22,18 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicLiquidFoam
+    mySonicLiquidFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar flow of a
-    compressible liquid.
+    Transient solver for trans-sonic/supersonic, turbulent flow of a
+    compressible liquid with support for dynamic meshes.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
+#include "CorrectPhi.H"
 #include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,86 +46,105 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createMesh.H"
-    #include "createControl.H"
+    #include "createDynamicFvMesh.H"
+    #include "createDyMControls.H"
     #include "createFields.H"
+    #include "createRhoUfIfPresent.H"
     #include "initContinuityErrs.H"
 
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    turbulence->validate();
+    
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (runTime.run())
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        #include "readDyMControls.H"
+
+        // Store divrhoU from the previous mesh so that it can be mapped
+        // and used in correctPhi to ensure the corrected phi has the
+        // same divergence
+        autoPtr<volScalarField> divrhoU;
+        if (correctPhi)
+        {
+            divrhoU.reset
+            (
+                new volScalarField
+                (
+                    "divrhoU",
+                    fvc::div(fvc::absolute(phi, rho, U))
+                )
+            );
+        }
 
         #include "compressibleCourantNo.H"
+        #include "setInitialDeltaT.H"
+
+        ++runTime;
+        
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         solve(fvm::ddt(rho) + fvc::div(phi));
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
-            fvVectorMatrix UEqn
-            (
-                fvm::ddt(rho, U)
-              + fvm::div(phi, U)
-	      + turbulence->divDevRhoReff(rho, U)
-	      ==
-	      fvOptions(rho, U)
-            );
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            {
+                // Store momentum to set rhoUf for introduced faces.
+                autoPtr<volVectorField> rhoU;
+                if (rhoUf.valid())
+                {
+                    rhoU.reset(new volVectorField("rhoU", rho*U));
+                }
 
-            fvOptions.constrain(UEqn);
+                // Do any mesh changes
+                mesh.controlledUpdate();
 
-            solve(UEqn == -fvc::grad(p));
+                if (mesh.changing())
+                {
+                    MRF.update();
 
-	    fvOptions.correct(U);
+                    if (correctPhi)
+                    {
+                        // Calculate absolute flux
+                        // from the mapped surface velocity
+                        phi = mesh.Sf() & rhoUf();
+
+                        #include "correctPhi.H"
+
+                        // Make the fluxes relative to the mesh-motion
+                        fvc::makeRelative(phi, rho, U);
+                    }
+                    
+                    if (checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
+                }
+            }
+
+            if (pimple.firstIter() && !pimple.SIMPLErho())
+            {
+                #include "rhoEqn.H"
+            }
+
+Info << "UUU" << nl;
+            #include "UEqn.H"
 
             // --- Pressure corrector loop
-            while (pimple.correct())
+Info << "p" << nl;
+            while (pimple.correct())                
             {
-                volScalarField rAU("rAU", 1.0/UEqn.A());
-                surfaceScalarField rhorAUf
-                (
-                    "rhorAUf",
-                    fvc::interpolate(rho*rAU)
-                );
-
-                U = rAU*UEqn.H();
-
-                surfaceScalarField phid
-                (
-                    "phid",
-                    psi
-                   *(
-                       fvc::flux(U)
-                     + rhorAUf*fvc::ddtCorr(rho, U, phi)/fvc::interpolate(rho)
-                    )
-                );
-
-                phi = (rhoO/psi)*phid;
-
-                fvScalarMatrix pEqn
-                (
-                    fvm::ddt(psi, p)
-                  + fvc::div(phi)
-                  + fvm::div(phid, p)
-                  - fvm::laplacian(rhorAUf, p)
-                );
-
-                pEqn.solve();
-
-                phi += pEqn.flux();
-
-                solve(fvm::ddt(rho) + fvc::div(phi));
-                #include "compressibleContinuityErrs.H"
-
-                U -= rAU*fvc::grad(p);
-                U.correctBoundaryConditions();
-		fvOptions.correct(U);
+                #include "pEqn.H"
             }
 
 	    phiv==(phi/fvc::interpolate(rho));
+
 	    if (pimple.turbCorr())
             {
                 laminarTransport.correct();
