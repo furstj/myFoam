@@ -150,7 +150,9 @@ Foam::functionObjects::mixingInterface::mixingInterface
     {
         scalar xi = -M_PI/2 + M_PI*scalar(i)/segments_;
         paramBins_[i] = parMin + (parMax - parMin)*(sin(xi)+1)/2;
-        //Info << paramBins_[i] << nl;
+        #ifdef FULLDEBUG
+          Info << paramBins_[i] << nl;
+        #endif
     }
 
 }
@@ -437,9 +439,9 @@ Foam::List<scalar>  Foam::functionObjects::mixingInterface::getScalarAverages(
 
     for (label i=0; i<segments_; i++)
     {
-        averages[i] /= w[i];
         if (w[i]<1.e-16)
             Info << "ZERO WEIGHTS!" << nl;
+        averages[i] /= w[i];
     };
 
     return averages;
