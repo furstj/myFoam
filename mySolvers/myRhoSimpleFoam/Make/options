@@ -24,4 +24,7 @@ EXE_LIBS = \
     -lthermoTools \
     -latmosphericModels \
     -lregionFaModels \
-    -lfiniteArea
+    -lfiniteArea \
+    -L$(FOAM_USER_LIBBIN) \
+    -lmyThermophysicalModels \
+
