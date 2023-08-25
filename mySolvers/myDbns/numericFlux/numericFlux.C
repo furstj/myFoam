@@ -184,6 +184,10 @@ void Foam::numericFlux::computeFlux()
             const vectorField& pU = U_.boundaryField()[patchi];
             const scalarField& pT = T_.boundaryField()[patchi];
 
+            const fvsPatchScalarField& pp_pos = p_pos.boundaryField()[patchi];
+            const fvsPatchVectorField& pU_pos = U_pos.boundaryField()[patchi];
+            const fvsPatchScalarField& pT_pos = T_pos.boundaryField()[patchi];
+
             forAll (pp, facei)
             {
                 // Calculate fluxes
@@ -192,9 +196,9 @@ void Foam::numericFlux::computeFlux()
                     pRhoFlux[facei],
                     pRhoUFlux[facei],
                     pRhoEFlux[facei],
-                    pp[facei],  pp[facei],
-                    pU[facei],  pU[facei],
-                    pT[facei],  pT[facei],
+                    pp_pos[facei],  pp[facei],    // was pp[facei], pp[facei] and so on
+                    pU_pos[facei],  pU[facei],
+                    pT_pos[facei],  pT[facei],
                     pSf[facei],
                     pMagSf[facei],
 		    pMshPhi[facei]
