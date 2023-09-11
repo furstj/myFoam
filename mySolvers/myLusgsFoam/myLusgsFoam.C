@@ -49,7 +49,7 @@ Author
 #include "numericFlux.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
-
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

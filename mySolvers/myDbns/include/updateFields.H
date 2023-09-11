@@ -13,7 +13,7 @@
         h[cell] = e[cell] + p[cell]/rho[cell];
     }    
 
-    // Estimate the bdensity at the boundary using "zeroGradient"
+    // Estimate the density at the boundary using "zeroGradient"
     rho.boundaryFieldRef() = thermo.rho()().boundaryField();
 
     // Correct boundary conditions
@@ -23,6 +23,7 @@
     h.correctBoundaryConditions();
 
     boundMinMax(p, pMin, pMax);
+    fvOptions.correct(h);
 
     // Correct thermodynamics
     thermo.correct();

@@ -98,3 +98,6 @@ autoPtr<compressible::turbulenceModel> turbulence
         thermo
     )
 );
+
+#include "createFvOptions.H"
+
