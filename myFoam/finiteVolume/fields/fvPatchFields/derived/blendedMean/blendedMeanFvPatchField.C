@@ -152,7 +152,7 @@ void Foam::blendedMeanFvPatchField<Type>::write(Ostream& os) const
     #if (OPENFOAM >= 1812)
     meanValue_->writeData(os);
     blendFactor_->writeData(os);
-    fvPatchField<Type>::writeValueEntry(os);
+    this->writeEntry("value", os);
     #else 
     writeEntry(os, meanValue_());
     writeEntry(os, blendFactor_());
