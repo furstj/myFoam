@@ -219,15 +219,13 @@ inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::Z
     
     if (disc > 0)
     {   // one root real, two are complex
-        scalar s = r + sqrt(disc);
-        s = ((s < 0) ? -pow(-s, 1.0/3.0) : pow(s, 1.0/3.0));
-        scalar t = r - sqrt(disc);
-        t = ((t < 0) ? -pow(-t, 1.0/3.0) : pow(t, 1.0/3.0));
+        scalar s = cbrt(r + sqrt(disc));
+        scalar t = cbrt(r - sqrt(disc));
         root = -term1 + s + t;
     } 
     else if (disc == 0)
     {   // All roots real, at least two are equal.
-        scalar r13 = ((r < 0) ? -pow(-r,1.0/3.0) : pow(r,1.0/3.0));
+        scalar r13 = std::cbrt(r); //((r < 0) ? -pow(-r,1.0/3.0) : pow(r,1.0/3.0));
         root = max(2*r13 - term1, -r13 - term1);
     }
     else
