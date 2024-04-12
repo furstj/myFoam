@@ -14,7 +14,8 @@
     }    
 
     // Estimate the density at the boundary using "zeroGradient"
-    rho.boundaryFieldRef() = thermo.rho()().boundaryField();
+    //rho.boundaryFieldRef() = thermo.rho()().boundaryField();
+    rho.correctBoundaryConditions();
 
     // Correct boundary conditions
     U.correctBoundaryConditions();

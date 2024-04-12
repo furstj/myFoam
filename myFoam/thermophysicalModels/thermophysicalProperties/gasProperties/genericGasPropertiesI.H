@@ -230,19 +230,32 @@ scalar genericGasProperties<TransportModel>::pEs(const scalar Es, const scalar r
 {
     scalar p = p0;
     scalar T = p0/(rho*R());   // Estimate from perfect gas!
-    const scalar tol = 1.e-8;
+    const scalar tol = 1.e-6;
     const label maxIter = 100;
 
     const scalar TTol = T*tol;
     const scalar pTol = p*tol;
-    
+
     label iter = 0;
-    scalar dT, dp;
-    
+    scalar a[2][2], det, dp, dT, dv, de;
+    scalar v, beta_p, beta_T;
+
+    v = 1.0 / rho;
     do
     {
-        dT = (Es - this->Es(p, T))/ this->Cv(p,T);
-        dp = this->Z(p,T)*R()*rho*dT;
+        dv = v - 1.0/this->rho(p,T);
+        de = Es - this->Es(p,T);
+        
+        beta_p = this->beta_p(p,T);
+        beta_T = this->beta_T(p,T);
+        a[0][0] = -v*beta_T;
+        a[0][1] =  v*beta_p;
+        a[1][0] = -v*T*beta_p + p*v*beta_T;
+        a[1][1] = this->Cp(p,T) - p*v*beta_p;
+        det = a[0][0]*a[1][1] - a[0][1]*a[1][0];
+        dp = ( a[1][1]*dv - a[0][1]*de) / det;
+        dT = (-a[1][0]*dv + a[0][0]*de) / det;
+
         T += dT;
         p += dp;
 
@@ -250,14 +263,17 @@ scalar genericGasProperties<TransportModel>::pEs(const scalar Es, const scalar r
         {
             FatalErrorInFunction
                 << "Maximum number of iterations exceeded: " << maxIter
-                << " when starting from p0:" << p0
-                << " T  : " << T
-                << " p  : " << p
-                << " tol: " << tol
-                << abort(FatalError);
+                    << " when starting from p0:" << p0
+                    << " T  : " << T
+                    << " p  : " << p
+                    << " tol: " << tol
+                    << abort(FatalError);
         }
+	//Info << iter << "\t" << Es << "\t" << this->Es(p,T) << "\t" << p << nl;
+        
     } while ( (mag(dT) > TTol) || (mag(dp) > pTol) );
     return p;
+        
 }
 
 
