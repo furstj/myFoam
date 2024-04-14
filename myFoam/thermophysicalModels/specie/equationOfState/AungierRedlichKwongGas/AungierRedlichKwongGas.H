@@ -166,6 +166,9 @@ public:
             //- Is the equation of state is isochoric i.e. rho = const
             static const bool isochoric = false;
 
+            //- Return pressure [Pa]
+            inline scalar p(scalar rho, scalar T) const;
+
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
 
@@ -187,8 +190,7 @@ public:
             //- Return (Cp - Cv) [J/(kg K)]
             inline scalar CpMCv(scalar p, scalar T) const;
 
-
-    // IO
+// IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
