@@ -78,6 +78,8 @@ Foam::functionObjects::mixingInterface::mixingInterface
     convectiveVariables_(dict.getOrDefault<wordList>("convective", wordList())),
     relax_(dict.getOrDefault<scalar>("relaxation", 1.0)),
     frequency_(dict.getOrDefault<label>("frequency", 1)),
+    flowRateRelax_(dict.getOrDefault<scalar>("flowRateRelaxation", 0.0)),
+    totalPressureCorrection_(Zero),
     upstreamPatchID_(mesh().boundaryMesh().findPatchID(upstreamPatch_)),
     downstreamPatchID_(mesh().boundaryMesh().findPatchID(downstreamPatch_)),
     counter_(Zero)
@@ -172,7 +174,7 @@ bool Foam::functionObjects::mixingInterface::execute()
     
     if (counter_ % frequency_ != 0) return true;
     
-    Info << "MIXING INTERFACE EXECUTE" << nl << nl;;
+    Info << "MIXING INTERFACE EXECUTE" << nl;;
 
     const volScalarField& p  = mesh().lookupObject<volScalarField>(word("p"));
     const volScalarField& T  = mesh().lookupObject<volScalarField>(word("T"));
@@ -181,7 +183,7 @@ bool Foam::functionObjects::mixingInterface::execute()
     const scalarField& pUp = p.boundaryField()[upstreamPatchID_];
     const scalarField& TUp = T.boundaryField()[upstreamPatchID_];
     const vectorField& UUp = U.boundaryField()[upstreamPatchID_];
-
+    
     const scalarField& pDn = p.boundaryField()[downstreamPatchID_];
 
     const auto& thermo =
@@ -239,7 +241,7 @@ bool Foam::functionObjects::mixingInterface::execute()
         forAll(p0, i)
         {
             vector x = mesh().Cf().boundaryField()[downstreamPatchID_][i];
-            p0[i] = (1 - relax_)*p0[i] + relax_*interpolateScalar(pTotAvgUp, parameter_(x));
+            p0[i] = (1 - relax_)*p0[i] + relax_*interpolateScalar(pTotAvgUp, parameter_(x)) + totalPressureCorrection_;
         }
 
         volScalarField::Boundary& Tb =
@@ -333,6 +335,22 @@ bool Foam::functionObjects::mixingInterface::execute()
                 inletDir[i] -= 2*(inletDir[i] & n)*n;
             }
         }
+
+        // Update total pressure correction
+        if (flowRateRelax_ > 0)
+        {
+            const surfaceScalarField& phi = mesh().lookupObject<surfaceScalarField>(word("phi"));
+            scalar AUp = gSum(mesh().magSf().boundaryField()[upstreamPatchID_]);
+            scalar flowRateUp = gSum(phi.boundaryField()[upstreamPatchID_]) / AUp;
+        
+            scalar ADn = gSum(mesh().magSf().boundaryField()[downstreamPatchID_]);
+            scalar flowRateDn = -gSum(phi.boundaryField()[downstreamPatchID_]) / ADn;
+
+            scalar Uref = sum(mag(UAvgUp)) / UAvgUp.size();
+
+            totalPressureCorrection_ += flowRateRelax_*Uref*(flowRateUp - flowRateDn);
+            Info << "Total pressure correction: " << totalPressureCorrection_ << nl;
+        }
     }
 
 
@@ -350,7 +368,7 @@ bool Foam::functionObjects::mixingInterface::execute()
         fixedValueFvPatchScalarField& pp =
             refCast<fixedValueFvPatchScalarField>(pb[upstreamPatchID_]);
 
-        // Extrapolate intrnal pressure 
+        // Extrapolate internal pressure 
         pp.operator=(pp.patchInternalField());
         
         List<scalar> pAvgUp = getScalarAverages(
@@ -393,6 +411,8 @@ bool Foam::functionObjects::mixingInterface::execute()
             pv[i] = (1 - relax_)*pv[i] + relax_*interpolateScalar(vAvgDn, parameter_(x));
         }        
     }
+
+    Info << nl;
     
     return true;
 }
