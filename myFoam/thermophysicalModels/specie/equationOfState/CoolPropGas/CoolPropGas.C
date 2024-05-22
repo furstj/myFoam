@@ -42,7 +42,7 @@ Foam::CoolPropGas<Specie>::CoolPropGas
     )
 {
     Specie::operator=(Specie(1.0, state_->molar_mass()*1e3));
-    Info << this->W() << nl;
+    //Info << this->W() << nl;
 }
 
 
