@@ -14,6 +14,7 @@ endif
 EXE_INC = \
     $(CPMACRO) \
     -I./specie/equationOfState/AungierRedlichKwongGas \
+    -I./specie/equationOfState/pVirialGas \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \

@@ -29,6 +29,7 @@ License
 #include "perfectGas.H"
 #include "PengRobinsonGas.H"
 #include "AungierRedlichKwongGas.H"
+#include "pVirialGas.H"
 #include "hConstThermo.H"
 #include "eConstThermo.H"
 #include "janafThermo.H"
@@ -145,6 +146,22 @@ makeGasProperties(
     sensibleEnthalpy,
     janafThermo,
     AungierRedlichKwongGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    pVirialGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    pVirialGas,
     specie
 );
 
