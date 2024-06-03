@@ -133,6 +133,18 @@ makeThermos
     pureMixture,
     sutherlandTransport,
     sensibleEnthalpy,
+    hConstThermo,
+    pVirialGas,
+    specie
+);
+
+makeThermos
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
     hPolynomialThermo,
     pVirialGas,
     specie

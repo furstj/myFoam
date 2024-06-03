@@ -152,6 +152,14 @@ makeGasProperties(
 makeGasProperties(
     sutherlandTransport,
     sensibleEnthalpy,
+    hConstThermo,
+    pVirialGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
     hPolynomialThermo,
     pVirialGas,
     specie
@@ -281,6 +289,46 @@ optimizeAungierRedlichKwongGas(hPolynomialThermo, sutherlandTransport, sensibleE
 optimizeAungierRedlichKwongGas(janafThermo, constTransport, sensibleEnthalpy);
 optimizeAungierRedlichKwongGas(janafThermo, sutherlandTransport, sensibleEnthalpy);
 
+
+// =============== Optimization of p-Virial gas model
+
+#define optimizePVirialGas(Thermo,Transport,Type)                          \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<Thermo<pVirialGas<specie>>,Type>>        \
+        >::beta_p(scalar p, scalar T) const                                \
+    {                                                                      \
+        return 1/T;                                                        \
+    }                                                                      \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<Thermo<pVirialGas<specie>>,Type>>        \
+        >::beta_T(scalar p, scalar T) const                                \
+    {                                                                      \
+        scalar z  = this->Z(p, T);                                         \
+        scalar z0 = this->Z(0.0, T);                                       \
+        return z0/z / p;                                                   \
+    }                                                                      \
+
+#define optimizehConstPVirialGas(Transport,Type)                           \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<pVirialGas<specie>>,Type>>  \
+    >::THs(const scalar Hs, const scalar p, const scalar T0) const         \
+    {                                                                      \
+        scalar Href = this->Hs(0,0);                                       \
+        return (Hs - Href)/Cp(p,T0);                                       \
+    }                                                                      \
+                                                                           \
+
+optimizePVirialGas(hConstThermo, constTransport, sensibleEnthalpy);
+optimizePVirialGas(hPolynomialThermo, sutherlandTransport, sensibleEnthalpy);
+
+optimizehConstPVirialGas(constTransport, sensibleEnthalpy);
+optimizehConstPVirialGas(sutherlandTransport, sensibleEnthalpy);
 
 // =============== Optimization of CoolProp model =====================
 #ifdef COOLPROP
