@@ -35,7 +35,7 @@ Description
     and transfers chosen quantities (after mixing) in given direction.
     
     The condition is especially tailored for compressible flows and therefore it transfers:
-    - total pressure:     downstream
+    - total pressure:     downstream with possible correction to get flow rate conservation
     - total temperature:  downstream
     - velocity direction: downstream
     - static pressure:    upstream
@@ -57,7 +57,8 @@ Usage
         configuration      axial;       // axial for axial machines, radial for radial machines
         segments           10;          // Splits patches into 10 segments
         convective         (k omega);   // Other convective scalar quantities
-        relaxation         0.5;
+        relaxation         0.5;         // 
+        flowRateRelaxation 0.1;         // Correct total pressure in order to conserve flow rate
     }
     \endverbatim
 
@@ -75,6 +76,7 @@ Usage
       convective      | Other convective quantities   | wordList |  no  | -
       relaxation      | Relaxation parameter          | scalar | no    | 1
       frequency       | Frequency of mixing update    | label  | no    | 1
+      flowRateRelaxation | Relaxation of total pressure correction | scalar | no | 0
     \endtable
 
     Options for the \c configuration entry:
@@ -171,6 +173,12 @@ class mixingInterface
 
     //- Frequency of updates
     label frequency_;
+
+    //- Relaxation fo total pressure correction (0 -> no correction) 
+    scalar flowRateRelax_;
+
+    //- Total pressure correctioon
+    scalar totalPressureCorrection_;
     
     //- Parameter bins
     scalarList paramBins_;

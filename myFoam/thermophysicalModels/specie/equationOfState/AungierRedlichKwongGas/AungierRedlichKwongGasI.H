@@ -104,6 +104,18 @@ Foam::AungierRedlichKwongGas<Specie>::New
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Specie>
+inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::p
+(
+    scalar rho,
+    scalar T
+) const
+{
+    const scalar V = 1.0/rho;
+    const scalar alpha = a_*pow(T/Tc_, -n_);
+    return  this->R()*T/(V - b_ + c_) - alpha/(V*(V + b_));
+}
+
+template<class Specie>
 inline Foam::scalar Foam::AungierRedlichKwongGas<Specie>::rho
 (
     scalar p,

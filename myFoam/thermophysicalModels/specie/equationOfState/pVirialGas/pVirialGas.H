@@ -22,19 +22,30 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::AungierRedlichKwongGas
+    Foam::pVirialGas
 
 Description
-    AungierRedlichKwongGas gas equation of state.
+    Linearized virial equation of state expressed in terms of pressure.
+
+    The equation of state is given by
+
+        p = rho R T (z0 + z1 p)
+
+    where z0 and z1 are the pseudo-virial coefficients. Note that equation corresponds to
+    the standard virial equation of state 
+
+        p = rho R' T (1 + B' p)
+    
+    with R' = z0 R and B' = z1/z0.
 
 SourceFiles
-    AungierRedlichKwongGasI.H
-    AungierRedlichKwongGas.C
+    pVirialGasI.H
+    pVirialGas.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef AungierRedlichKwongGas_H
-#define AungierRedlichKwongGas_H
+#ifndef pVirialGas_H
+#define pVirialGas_H
 
 #include "autoPtr.H"
 #include "specie.H"
@@ -46,104 +57,78 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class Specie> class AungierRedlichKwongGas;
+template<class Specie> class pVirialGas;
 
 template<class Specie>
-inline AungierRedlichKwongGas<Specie> operator+
+inline pVirialGas<Specie> operator+
 (
-    const AungierRedlichKwongGas<Specie>&,
-    const AungierRedlichKwongGas<Specie>&
+    const pVirialGas<Specie>&,
+    const pVirialGas<Specie>&
 );
 
 template<class Specie>
-inline AungierRedlichKwongGas<Specie> operator*
+inline pVirialGas<Specie> operator*
 (
     const scalar,
-    const AungierRedlichKwongGas<Specie>&
+    const pVirialGas<Specie>&
 );
 
 template<class Specie>
-inline AungierRedlichKwongGas<Specie> operator==
+inline pVirialGas<Specie> operator==
 (
-    const AungierRedlichKwongGas<Specie>&,
-    const AungierRedlichKwongGas<Specie>&
+    const pVirialGas<Specie>&,
+    const pVirialGas<Specie>&
 );
 
 template<class Specie>
 Ostream& operator<<
 (
     Ostream&,
-    const AungierRedlichKwongGas<Specie>&
+    const pVirialGas<Specie>&
 );
 
 
 
 /*---------------------------------------------------------------------------*\
-                           Class AungierRedlichKwongGas Declaration
+                           Class pVirialGas Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Specie>
-class AungierRedlichKwongGas
+class pVirialGas
 :
     public Specie
 {
     // Private data
 
-        //- Critical Temperature [K]
-        scalar Tc_;
+        //- zeroth p-virial coefficient [-]
+        scalar z0_;
 
-        //- Critical volume [m^3/kg]
-        scalar Vc_;
-
-        //- Critical Pressure [Pa]
-        scalar Pc_;
-
-        //- Acentric factor [-]
-        scalar omega_;
-
-        //- parameter a [m^5/(kg*s^2)]]
-        scalar a_;
-
-        //- parameter b [m^3/kg]
-        scalar b_;
-
-        //- parameter b [m^3/kg]
-        scalar c_;
-
-        //- parameter n [-]
-        scalar n_;
-
-    // Private methods
-    inline Foam::scalar dpdV(scalar V, scalar T, scalar alpha) const;
-
-    inline Foam::scalar dpdT(scalar V, scalar T, scalar alpha) const;
-
+        //- first p-virial coefficient [1/Pa]
+        scalar z1_;
 
 public:
 
     // Constructors
 
         //- Construct from components
-        inline AungierRedlichKwongGas
+        inline pVirialGas
         (
             const Specie& sp,
-            const scalar& Tc,
-            const scalar& Vc,
-            const scalar& Pc,
-            const scalar& omega
+            const scalar& z0,
+            const scalar& z1
         );
 
         //- Construct from dictionary
-        AungierRedlichKwongGas(const dictionary& dict);
+        pVirialGas(const dictionary& dict);
 
         //- Construct as named copy
-        inline AungierRedlichKwongGas(const word& name, const AungierRedlichKwongGas&);
+        inline pVirialGas(const word& name, const pVirialGas&);
 
         //- Construct and return a clone
-        inline autoPtr<AungierRedlichKwongGas> clone() const;
+        inline autoPtr<pVirialGas> clone() const;
 
         // Selector from dictionary
-        inline static autoPtr<AungierRedlichKwongGas> New
+        inline static autoPtr<pVirialGas> New
         (
             const dictionary& dict
         );
@@ -154,7 +139,7 @@ public:
         //- Return the instantiated type name
         static word typeName()
         {
-            return "AungierRedlichKwongGas<" + word(Specie::typeName_()) + '>';
+            return "pVirialGas<" + word(Specie::typeName_()) + '>';
         }
 
         // Fundamental properties
@@ -197,28 +182,28 @@ public:
 
     // Member operators
 
-        inline void operator+=(const AungierRedlichKwongGas&);
+        inline void operator+=(const pVirialGas&);
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
-        friend AungierRedlichKwongGas operator+ <Specie>
+        friend pVirialGas operator+ <Specie>
         (
-            const AungierRedlichKwongGas&,
-            const AungierRedlichKwongGas&
+            const pVirialGas&,
+            const pVirialGas&
         );
 
-        friend AungierRedlichKwongGas operator* <Specie>
+        friend pVirialGas operator* <Specie>
         (
             const scalar s,
-            const AungierRedlichKwongGas&
+            const pVirialGas&
         );
 
-        friend AungierRedlichKwongGas operator== <Specie>
+        friend pVirialGas operator== <Specie>
         (
-            const AungierRedlichKwongGas&,
-            const AungierRedlichKwongGas&
+            const pVirialGas&,
+            const pVirialGas&
         );
 
 
@@ -227,7 +212,7 @@ public:
         friend Ostream& operator<< <Specie>
         (
             Ostream&,
-            const AungierRedlichKwongGas&
+            const pVirialGas&
         );
 };
 
@@ -238,10 +223,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "AungierRedlichKwongGasI.H"
+#include "pVirialGasI.H"
 
 #ifdef NoRepository
-    #include "AungierRedlichKwongGas.C"
+    #include "pVirialGas.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

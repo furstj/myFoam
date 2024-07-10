@@ -29,6 +29,7 @@ License
 #include "perfectGas.H"
 #include "PengRobinsonGas.H"
 #include "AungierRedlichKwongGas.H"
+#include "pVirialGas.H"
 #include "hConstThermo.H"
 #include "eConstThermo.H"
 #include "janafThermo.H"
@@ -148,6 +149,30 @@ makeGasProperties(
     specie
 );
 
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    pVirialGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    pVirialGas,
+    specie
+);
+
+makeGasProperties(
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    pVirialGas,
+    specie
+);
+
 #ifdef COOLPROP
 makeGasProperties(
     CoolPropTransport,
@@ -216,6 +241,94 @@ makeGasProperties(
 optimizePerfectGas(constTransport, sensibleEnthalpy);
 optimizePerfectGas(sutherlandTransport, sensibleEnthalpy);
 
+// =============== Optimization of Aungier-Redlich-Kwong gas model
+
+#define optimizeAungierRedlichKwongGas(Thermo,Transport,Type)             \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<Thermo<AungierRedlichKwongGas<specie>>,Type>>  \
+    >::pEs(const scalar Es, const scalar rho, const scalar p0) const       \
+    {                                                                      \
+        scalar p = p0;                                                     \
+        scalar T = p0/(rho*R());                                           \
+        const scalar tol = 1.e-8;                                          \
+        const label maxIter = 100;                                         \
+                                                                           \
+        const scalar TTol = T*tol;                                         \
+        const scalar pTol = p*tol;                                         \
+        scalar dT, dp;                                                     \
+        label iter = 0;                                                    \
+        do                                                                 \
+        {                                                                  \
+            dT = (Es - this->Es(p, T))/this->Cv(p,T);                      \
+            T += dT;                                                       \
+            dp = transport_.p(rho,T) - p;                                  \
+            p += dp;                                                       \
+                                                                           \
+            if (iter++ > maxIter)                                          \
+            {                                                              \
+                FatalErrorInFunction                                       \
+                    << "Maximum number of iterations exceeded: " << maxIter \
+                        << " when starting from p0:" << p0                 \
+                        << " T  : " << T                                   \
+                        << " p  : " << p                                   \
+                        << " tol: " << tol                                 \
+                        << abort(FatalError);                              \
+            }                                                              \
+                                                                           \
+        } while( (mag(dT) > TTol) || (mag(dp) > pTol) );                   \
+        return p;                                                          \
+    }
+
+
+optimizeAungierRedlichKwongGas(hConstThermo, constTransport, sensibleEnthalpy);
+optimizeAungierRedlichKwongGas(hConstThermo, sutherlandTransport, sensibleEnthalpy);
+optimizeAungierRedlichKwongGas(hPolynomialThermo, constTransport, sensibleEnthalpy);
+optimizeAungierRedlichKwongGas(hPolynomialThermo, sutherlandTransport, sensibleEnthalpy);
+optimizeAungierRedlichKwongGas(janafThermo, constTransport, sensibleEnthalpy);
+optimizeAungierRedlichKwongGas(janafThermo, sutherlandTransport, sensibleEnthalpy);
+
+
+// =============== Optimization of p-Virial gas model
+
+#define optimizePVirialGas(Thermo,Transport,Type)                          \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<Thermo<pVirialGas<specie>>,Type>>        \
+        >::beta_p(scalar p, scalar T) const                                \
+    {                                                                      \
+        return 1/T;                                                        \
+    }                                                                      \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<Thermo<pVirialGas<specie>>,Type>>        \
+        >::beta_T(scalar p, scalar T) const                                \
+    {                                                                      \
+        scalar z  = this->Z(p, T);                                         \
+        scalar z0 = this->Z(0.0, T);                                       \
+        return z0/z / p;                                                   \
+    }                                                                      \
+
+#define optimizehConstPVirialGas(Transport,Type)                           \
+                                                                           \
+    template<>                                                             \
+    scalar genericGasProperties<                                           \
+        Transport<species::thermo<hConstThermo<pVirialGas<specie>>,Type>>  \
+    >::THs(const scalar Hs, const scalar p, const scalar T0) const         \
+    {                                                                      \
+        scalar Href = this->Hs(0,0);                                       \
+        return (Hs - Href)/Cp(p,T0);                                       \
+    }                                                                      \
+                                                                           \
+
+optimizePVirialGas(hConstThermo, constTransport, sensibleEnthalpy);
+optimizePVirialGas(hPolynomialThermo, sutherlandTransport, sensibleEnthalpy);
+
+optimizehConstPVirialGas(constTransport, sensibleEnthalpy);
+optimizehConstPVirialGas(sutherlandTransport, sensibleEnthalpy);
 
 // =============== Optimization of CoolProp model =====================
 #ifdef COOLPROP

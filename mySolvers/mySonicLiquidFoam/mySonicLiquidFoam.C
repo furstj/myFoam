@@ -133,11 +133,9 @@ int main(int argc, char *argv[])
                 #include "rhoEqn.H"
             }
 
-Info << "UUU" << nl;
             #include "UEqn.H"
 
             // --- Pressure corrector loop
-Info << "p" << nl;
             while (pimple.correct())                
             {
                 #include "pEqn.H"

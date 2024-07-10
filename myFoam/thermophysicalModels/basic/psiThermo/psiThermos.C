@@ -32,6 +32,7 @@ License
 #include "perfectGas.H"
 #include "PengRobinsonGas.H"
 #include "AungierRedlichKwongGas.H"
+#include "pVirialGas.H"
 
 #include "hConstThermo.H"
 #include "eConstThermo.H"
@@ -124,6 +125,43 @@ makeThermos
     AungierRedlichKwongGas,
     specie
 );
+
+makeThermos
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    pVirialGas,
+    specie
+);
+
+makeThermos
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    pVirialGas,
+    specie
+);
+
+makeThermos
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    pVirialGas,
+    specie
+);
+
 
 #ifdef COOLPROP
 makeThermos

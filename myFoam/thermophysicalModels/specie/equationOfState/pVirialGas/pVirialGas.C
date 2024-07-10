@@ -23,26 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CoolPropGas.H"
+#include "pVirialGas.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Specie>
-Foam::CoolPropGas<Specie>::CoolPropGas
+Foam::pVirialGas<Specie>::pVirialGas
 (
     const dictionary& dict
 )
 :
-    Specie(1.0, 1.0),  // Molar weight will be taken from CoolProp later
-    state_(CoolProp::AbstractState::factory(
-        dict.subDict("CoolProp").get<word>("backend"),
-        dict.subDict("CoolProp").get<word>("fluid")
-        )
-    )
+    Specie(dict),
+    z0_(readScalar(dict.subDict("equationOfState").lookup("z0"))),
+    z1_(readScalar(dict.subDict("equationOfState").lookup("z1")))
 {
-    Specie::operator=(Specie(1.0, state_->molar_mass()*1e3));
-    //Info << this->W() << nl;
 }
 
 
@@ -50,7 +45,7 @@ Foam::CoolPropGas<Specie>::CoolPropGas
 
 
 template<class Specie>
-void Foam::CoolPropGas<Specie>::write(Ostream& os) const
+void Foam::pVirialGas<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 }
@@ -62,7 +57,7 @@ template<class Specie>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const CoolPropGas<Specie>& pg
+    const pVirialGas<Specie>& pg
 )
 {
     pg.write(os);

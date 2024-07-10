@@ -1,6 +1,7 @@
 ifdef COOLPROP
     CPMACRO=-DCOOLPROP=$(COOLPROP) 
     CPMACRO+= -I$(COOLPROP)/externals/fmtlib
+    CPMACRO+= -I$(COOLPROP)/externals/fmtlib/include
     CPMACRO+= -I$(COOLPROP)/include 
     CPMACRO+= -I./specie/equationOfState/CoolPropGas
     CPMACRO+= -I./thermo/CoolPropThermo
@@ -14,6 +15,7 @@ endif
 EXE_INC = \
     $(CPMACRO) \
     -I./specie/equationOfState/AungierRedlichKwongGas \
+    -I./specie/equationOfState/pVirialGas \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
