@@ -10,7 +10,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-type            Omega;
+type            Omicron;
 libs            (myfieldFunctionObjects);
 
 field           U;

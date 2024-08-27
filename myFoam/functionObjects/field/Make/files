@@ -2,7 +2,7 @@ MachNoRG/MachNoRG.C
 entropyRG/entropyRG.C
 totalPressureRG/totalPressureRG.C
 totalEnthalpyRG/totalEnthalpyRG.C
-Omega/Omega.C
+Omicron/Omicron.C
 
 
 LIB = $(FOAM_USER_LIBBIN)/libmyfieldFunctionObjects

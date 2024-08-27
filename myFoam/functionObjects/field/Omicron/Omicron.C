@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Omega.H"
+#include "Omicron.H"
 #include "fvcGrad.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -36,15 +36,15 @@ namespace Foam
 {
 namespace functionObjects
 {
-    defineTypeNameAndDebug(Omega, 0);
-    addToRunTimeSelectionTable(functionObject, Omega, dictionary);
+    defineTypeNameAndDebug(Omicron, 0);
+    addToRunTimeSelectionTable(functionObject, Omicron, dictionary);
 }
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::Omega::calc()
+bool Foam::functionObjects::Omicron::calc()
 {
     if (foundObject<volVectorField>(fieldName_))
     {
@@ -73,7 +73,7 @@ bool Foam::functionObjects::Omega::calc()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::Omega::Omega
+Foam::functionObjects::Omicron::Omicron
 (
     const word& name,
     const Time& runTime,
