@@ -25,18 +25,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::Omega
+    Foam::functionObjects::Omicron
 
 Group
     grpFieldFunctionObjects
 
 Description
-    Computes the vortex identification criterion Omega
+    Computes the vortex identification criterion Omicron
 
-    The vortex identification criterion Omega is defined as 
+    The vortex identification criterion Omicron is defined as 
 
     \f[
-        \Omega = \frac{W^2}{S^2 + W^2 + \epsilon}
+        \Omicron = \frac{W^2}{S^2 + W^2 + \epsilon}
     \f]
 
     where
@@ -48,19 +48,21 @@ Description
         \epsilon &= 10^{-10}
     \f}
 
-    The vortex is identified as \f$\Omega > 0.5\f$. Typical threshold value is 0.52.
+    The vortex is identified as \f$\Omicron > 0.5\f$. Typical threshold value is 0.52.
 
     The criterion is described in
       -  Liu, C. Q., Wang, Y. Q., Yang, Y., & Duan, Z. W. (2016). New omega vortex identification method. 
       Science China: Physics, Mechanics and Astronomy, 59(8), 1–9. https://doi.org/10.1007/S11433-016-0022-6
 
+    Note that authors call it Omega, but it may be a bit confusing
+
 Usage
     Minimal example by using \c system/controlDict.functions:
     \verbatim
-    Omega
+    Omicron
     {
         // Mandatory entries (unmodifiable)
-        type        Omega;
+        type        Omicron;
         libs        (fieldFunctionObjects);
     }
     \endverbatim
@@ -77,8 +79,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_Omega_H
-#define functionObjects_Omega_H
+#ifndef functionObjects_Omicron_H
+#define functionObjects_Omicron_H
 
 #include "fieldExpression.H"
 
@@ -90,29 +92,29 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class Omega Declaration
+                          Class Omicron Declaration
 \*---------------------------------------------------------------------------*/
 
-class Omega
+class Omicron
 :
     public fieldExpression
 {
     // Private Member Functions
 
-        //- Calculate the Omega field and return true if successful
+        //- Calculate the Omicron field and return true if successful
         virtual bool calc();
 
 
 public:
 
     //- Runtime type information
-    TypeName("Omega");
+    TypeName("Omicron");
 
 
     // Constructors
 
         //- Construct from Time and dictionary
-        Omega
+        Omicron
         (
             const word& name,
             const Time& runTime,
@@ -120,14 +122,14 @@ public:
         );
 
         //- No copy construct
-        Omega(const Omega&) = delete;
+        Omicron(const Omicron&) = delete;
 
         //- No copy assignment
-        void operator=(const Omega&) = delete;
+        void operator=(const Omicron&) = delete;
 
 
     //- Destructor
-    virtual ~Omega() = default;
+    virtual ~Omicron() = default;
 };
 
 
