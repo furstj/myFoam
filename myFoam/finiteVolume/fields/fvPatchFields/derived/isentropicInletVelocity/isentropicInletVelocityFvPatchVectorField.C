@@ -47,12 +47,11 @@ isentropicInletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     pName_("p"),
-    TName_("T"),
-    inletDir_(p.size())
+    TName_("T")
 {
-    refValue() = *this;
+    refValue() = Zero;
     refGrad() = Zero;
-    valueFraction() = 0.0;
+    valueFraction() = Zero;
 }
 
 
@@ -67,9 +66,17 @@ isentropicInletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     pName_(ptf.pName_),
-    TName_(ptf.TName_),
-    inletDir_(ptf.inletDir_, mapper)
-{}
+    TName_(ptf.TName_)
+{
+    if (ptf.inletDir_.size())
+    {
+        inletDir_ = mapper(ptf.inletDir_);
+    }
+    if (ptf.tangentialVelocity_.size())
+    {
+        tangentialVelocity_ = mapper(ptf.tangentialVelocity_);
+    }
+}
 
 
 Foam::isentropicInletVelocityFvPatchVectorField::
@@ -82,14 +89,34 @@ isentropicInletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     pName_(dict.getOrDefault<word>("p", "p")),
-    TName_(dict.getOrDefault<word>("T", "T")),
-    inletDir_("inletDirection", dict, p.size())
+    TName_(dict.getOrDefault<word>("T", "T"))
 {
+    bool hasTangentialVelocity = false;
     patchType() = dict.getOrDefault<word>("patchType", word::null);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    if (dict.found("tangentialVelocity"))
+    {
+        setTangentialVelocity
+        (
+            vectorField("tangentialVelocity", dict, p.size())
+        );
+        hasTangentialVelocity = true;
+    }
+    if (dict.found("inletDirection"))
+    {
+        if (hasTangentialVelocity)
+        {
+            FatalIOErrorInFunction(dict)
+                << "For " << this->internalField().name() << " on "
+                << this->patch().name() << nl
+                << "Doesn't allow both: inletDirection and tangentialVelocity" << nl
+                << exit(FatalIOError);
+        }
+        
+    }
     refValue() = *this;
     refGrad() = Zero;
-    valueFraction() = 0.0;
+    valueFraction() = Zero;
 }
 
 
@@ -102,7 +129,8 @@ isentropicInletVelocityFvPatchVectorField
     mixedFvPatchVectorField(pivpvf),
     pName_(pivpvf.pName_),
     TName_(pivpvf.TName_),
-    inletDir_(pivpvf.inletDir_)
+    inletDir_(pivpvf.inletDir_),
+    tangentialVelocity_(pivpvf.tangentialVelocity_)
 {}
 
 
@@ -116,11 +144,19 @@ isentropicInletVelocityFvPatchVectorField
     mixedFvPatchVectorField(pivpvf, iF),
     pName_(pivpvf.pName_),
     TName_(pivpvf.TName_),
-    inletDir_(pivpvf.inletDir_)
+    inletDir_(pivpvf.inletDir_),
+    tangentialVelocity_(pivpvf.tangentialVelocity_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+void Foam::isentropicInletVelocityFvPatchVectorField::
+setTangentialVelocity(const vectorField& tangentialVelocity)
+{
+    tangentialVelocity_ = tangentialVelocity;
+    const vectorField n(patch().nf());
+    refValue() = tangentialVelocity_ - n*(n & tangentialVelocity_);
+}
 
 void Foam::isentropicInletVelocityFvPatchVectorField::autoMap
 (
@@ -129,9 +165,23 @@ void Foam::isentropicInletVelocityFvPatchVectorField::autoMap
 {
     mixedFvPatchVectorField::autoMap(m);
 #if (OPENFOAM >= 1812)
-    inletDir_.autoMap(m);
+    if (inletDir_.size())
+    {
+        inletDir_.autoMap(m);
+    }
+    if (tangentialVelocity_.size())
+    {
+        tangentialVelocity_.autoMap(m);
+    }
 #else
-    m(inletDir_, inletDir_);
+    if (inletDir_.size())
+    {
+        m(inletDir_, inletDir_);
+    }
+    if (tangentialVelocity_.size())
+    {
+        m(tangentialVelocity_, tangentialVelocity_);
+    }
 #endif    
 }
 
@@ -147,8 +197,15 @@ void Foam::isentropicInletVelocityFvPatchVectorField::rmap
     const isentropicInletVelocityFvPatchVectorField& tiptf =
         refCast<const isentropicInletVelocityFvPatchVectorField>
         (ptf);
-
-    inletDir_.rmap(tiptf.inletDir_, addr);
+    if (inletDir_.size())
+    {
+        inletDir_.rmap(tiptf.inletDir_, addr);
+    }
+    if (tangentialVelocity_.size())
+    {
+        tangentialVelocity_.rmap(tiptf.tangentialVelocity_, addr);
+    }
+    
 }
 
 
@@ -201,9 +258,10 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
     vectorField& refValue = this->refValue();
     scalarField& valFraction = this->valueFraction();
 
-    forAll(pSf, faceI) {
-        const vector dir = inletDir_[faceI] / mag(inletDir_[faceI]);
-	
+    const bool hasInletDirection = inletDir_.size() > 0;
+    const bool hasTangentialVelocity = tangentialVelocity_.size() > 0;
+
+    forAll(pSf, faceI) {	
         label faceCellI = patch().faceCells()[faceI];
 
         // Total temperature, total pressure, ...
@@ -218,11 +276,13 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
         const scalar Tb = gasProps->TpS(pb, S, pT[faceI]);
         const scalar hb = gasProps->Hs(pb, Tb);
         const scalar magU = sqrt(2*max(H0 - hb, 0.0));
-            
-            */
+        */
 
         // Inward normal
         const vector n = -pSf[faceI] / mag(pSf[faceI]);
+        const vector dir = (hasInletDirection) ? inletDir_[faceI] / mag(inletDir_[faceI]) : n;
+        const vector utau = (hasTangentialVelocity) ? tangentialVelocity_[faceI] : Zero;
+
         const scalar oneByCos = 1 / (n & dir);
         const scalar p1 = pint[faceCellI];
         const scalar u1 = n & Uint[faceCellI];
@@ -240,7 +300,7 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
             ub = u1 + (pb - p1)/(rho1*c1);
             ub = max(ub, 0.0);
             Tb = gasProps->TpS(pb, S, Tb);
-            dH = H0 - gasProps->Hs(pb, Tb) - 0.5*sqr(ub*oneByCos);
+            dH = H0 - gasProps->Hs(pb, Tb) - 0.5*(sqr(ub*oneByCos) + magSqr(utau));
             dp = dH/(1/gasProps->rho(pb,Tb) + ub*sqr(oneByCos)/(rho1*c1));
             pb += dp;
             //Info << iter << " ub  " << ub << "  dp  " << dp << nl;
@@ -259,7 +319,7 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
             }
         } while (mag(dp) > pTol);
         
-        refValue[faceI] = dir*ub*oneByCos;
+        refValue[faceI] = dir*ub*oneByCos + utau;
         valFraction[faceI] = pos0(ub);
     }
     
@@ -281,10 +341,25 @@ void Foam::isentropicInletVelocityFvPatchVectorField::write
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
  #endif
 #if (OPENFOAM >= 1812)
-    inletDir_.writeEntry("inletDirection", os);
+    if (inletDir_.size())
+    {
+        inletDir_.writeEntry("inletDirection", os);
+    }
+    if (tangentialVelocity_.size())
+    {
+        tangentialVelocity_.writeEntry("tangentialVelocity", os);
+    }
     this->writeEntry("value", os);
 #else
-    writeEntry(os, "inletDirection", inletDir_);
+    if (inletDir_.size())
+    {
+        writeEntry(os, "inletDirection", inletDir_);
+    }
+    if (tangentialVelocity_.size())
+    {
+        writeEntry(os, "tangentialVelocity", tangentialVelocity_);
+    }
+    
     writeEntry(os, "value", *this);
 #endif    
 

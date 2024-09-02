@@ -28,14 +28,15 @@ Class
 
 Description
     isentropicInletVelocity implements a boundary condition for U with
-    given total temperature and given direction.  
-
-    The boundary value of velosity is computed using Riemann
-    invariant going along the outward directed characteristics 
-    (see e.g. Blazek)
+    given total temperature and given direction or tangential velocity.  
 
     The boundary condition is valid for compressible real gas and it is
     compatible with isentropicTemperature for T and isentropicPressure for p.
+    
+    The inlet direction is either:
+    - given by an optional inletDirection field, or
+    - has given tangential component given by an optional tangentialVelocity, or
+    - parallel to inward normal if no 'inletDirection' or 'tangentialVelocity' are given
 
 See also
     Foam::mixedFvPatchVectorField
@@ -76,6 +77,9 @@ class isentropicInletVelocityFvPatchVectorField
         //- Inlet direction
         vectorField inletDir_;
 
+        //- Optional tangential velocity
+        //- Note: either inletDir, or tangentialVelocity can be specified, but no both!
+        vectorField tangentialVelocity_;
 
 public:
 
@@ -199,6 +203,14 @@ public:
             {
                 return inletDir_;
             }
+
+    	    const vectorField& tangentialVelocity() 
+            {
+                return tangentialVelocity_;
+            }
+
+            //- Reset the tangential velocity
+            void setTangentialVelocity(const vectorField& tangentialVelocity);
 
         // Mapping functions
 
