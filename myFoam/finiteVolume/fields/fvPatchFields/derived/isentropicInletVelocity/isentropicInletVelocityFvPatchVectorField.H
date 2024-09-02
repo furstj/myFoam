@@ -237,7 +237,7 @@ public:
 
     // Member operators
 
-        virtual void operator=(const fvPatchField<vector>& pvf);
+        //virtual void operator=(const fvPatchField<vector>& pvf);
 };
 
 

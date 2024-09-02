@@ -368,19 +368,6 @@ void Foam::isentropicInletVelocityFvPatchVectorField::write
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::isentropicInletVelocityFvPatchVectorField::operator=
-(
-    const fvPatchField<vector>& pvf
-)
-{
-    fvPatchField<vector>::operator=
-    (
-        valueFraction()*(inletDir_*(inletDir_ & pvf))
-      + (1 - valueFraction())*pvf
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
