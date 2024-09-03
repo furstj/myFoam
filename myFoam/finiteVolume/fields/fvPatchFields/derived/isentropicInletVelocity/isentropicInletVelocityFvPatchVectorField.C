@@ -47,7 +47,9 @@ isentropicInletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     pName_("p"),
-    TName_("T")
+    TName_("T"),
+    hasInletDir_(false),
+    hasTangentialVelocity_(false)
 {
     refValue() = Zero;
     refGrad() = Zero;
@@ -66,13 +68,15 @@ isentropicInletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     pName_(ptf.pName_),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    hasInletDir_(ptf.hasInletDir_),
+    hasTangentialVelocity_(ptf.hasTangentialVelocity_)
 {
-    if (ptf.inletDir_.size())
+    if (ptf.hasInletDirection())
     {
         inletDir_ = mapper(ptf.inletDir_);
     }
-    if (ptf.tangentialVelocity_.size())
+    if (ptf.hasTangentialVelocity())
     {
         tangentialVelocity_ = mapper(ptf.tangentialVelocity_);
     }
@@ -89,9 +93,10 @@ isentropicInletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     pName_(dict.getOrDefault<word>("p", "p")),
-    TName_(dict.getOrDefault<word>("T", "T"))
+    TName_(dict.getOrDefault<word>("T", "T")),
+    hasInletDir_(false),
+    hasTangentialVelocity_(false)
 {
-    bool hasTangentialVelocity = false;
     patchType() = dict.getOrDefault<word>("patchType", word::null);
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     if (dict.found("tangentialVelocity"))
@@ -100,11 +105,11 @@ isentropicInletVelocityFvPatchVectorField
         (
             vectorField("tangentialVelocity", dict, p.size())
         );
-        hasTangentialVelocity = true;
+        hasTangentialVelocity_ = true;
     }
     if (dict.found("inletDirection"))
     {
-        if (hasTangentialVelocity)
+        if (hasTangentialVelocity_)
         {
             FatalIOErrorInFunction(dict)
                 << "For " << this->internalField().name() << " on "
@@ -112,7 +117,8 @@ isentropicInletVelocityFvPatchVectorField
                 << "Doesn't allow both: inletDirection and tangentialVelocity" << nl
                 << exit(FatalIOError);
         }
-        
+        inletDir_ = vectorField("inletDirection", dict, p.size());
+        hasInletDir_ = true;
     }
     refValue() = *this;
     refGrad() = Zero;
@@ -129,7 +135,9 @@ isentropicInletVelocityFvPatchVectorField
     mixedFvPatchVectorField(pivpvf),
     pName_(pivpvf.pName_),
     TName_(pivpvf.TName_),
+    hasInletDir_(pivpvf.hasInletDir_),
     inletDir_(pivpvf.inletDir_),
+    hasTangentialVelocity_(pivpvf.hasTangentialVelocity_),
     tangentialVelocity_(pivpvf.tangentialVelocity_)
 {}
 
@@ -144,7 +152,9 @@ isentropicInletVelocityFvPatchVectorField
     mixedFvPatchVectorField(pivpvf, iF),
     pName_(pivpvf.pName_),
     TName_(pivpvf.TName_),
+    hasInletDir_(pivpvf.hasInletDir_),
     inletDir_(pivpvf.inletDir_),
+    hasTangentialVelocity_(pivpvf.hasTangentialVelocity_),
     tangentialVelocity_(pivpvf.tangentialVelocity_)
 {}
 
@@ -154,6 +164,7 @@ void Foam::isentropicInletVelocityFvPatchVectorField::
 setTangentialVelocity(const vectorField& tangentialVelocity)
 {
     tangentialVelocity_ = tangentialVelocity;
+    hasTangentialVelocity_ = true;
     const vectorField n(patch().nf());
     refValue() = tangentialVelocity_ - n*(n & tangentialVelocity_);
 }
@@ -165,20 +176,20 @@ void Foam::isentropicInletVelocityFvPatchVectorField::autoMap
 {
     mixedFvPatchVectorField::autoMap(m);
 #if (OPENFOAM >= 1812)
-    if (inletDir_.size())
+    if (hasInletDirection())
     {
         inletDir_.autoMap(m);
     }
-    if (tangentialVelocity_.size())
+    if (hasTangentialVelocity())
     {
         tangentialVelocity_.autoMap(m);
     }
 #else
-    if (inletDir_.size())
+    if (hasInletDirection())
     {
         m(inletDir_, inletDir_);
     }
-    if (tangentialVelocity_.size())
+    if (hasTangentialVelocity())
     {
         m(tangentialVelocity_, tangentialVelocity_);
     }
@@ -197,11 +208,11 @@ void Foam::isentropicInletVelocityFvPatchVectorField::rmap
     const isentropicInletVelocityFvPatchVectorField& tiptf =
         refCast<const isentropicInletVelocityFvPatchVectorField>
         (ptf);
-    if (inletDir_.size())
+    if (hasInletDirection())
     {
         inletDir_.rmap(tiptf.inletDir_, addr);
     }
-    if (tangentialVelocity_.size())
+    if (hasTangentialVelocity())
     {
         tangentialVelocity_.rmap(tiptf.tangentialVelocity_, addr);
     }
@@ -258,9 +269,6 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
     vectorField& refValue = this->refValue();
     scalarField& valFraction = this->valueFraction();
 
-    const bool hasInletDirection = inletDir_.size() > 0;
-    const bool hasTangentialVelocity = tangentialVelocity_.size() > 0;
-
     forAll(pSf, faceI) {	
         label faceCellI = patch().faceCells()[faceI];
 
@@ -280,8 +288,8 @@ void Foam::isentropicInletVelocityFvPatchVectorField::updateCoeffs()
 
         // Inward normal
         const vector n = -pSf[faceI] / mag(pSf[faceI]);
-        const vector dir = (hasInletDirection) ? inletDir_[faceI] / mag(inletDir_[faceI]) : n;
-        const vector utau = (hasTangentialVelocity) ? tangentialVelocity_[faceI] : Zero;
+        const vector dir = (hasInletDirection()) ? inletDir_[faceI] / mag(inletDir_[faceI]) : n;
+        const vector utau = (hasTangentialVelocity()) ? tangentialVelocity_[faceI] : Zero;
 
         const scalar oneByCos = 1 / (n & dir);
         const scalar p1 = pint[faceCellI];
@@ -341,21 +349,21 @@ void Foam::isentropicInletVelocityFvPatchVectorField::write
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
  #endif
 #if (OPENFOAM >= 1812)
-    if (inletDir_.size())
+    if (hasInletDirection())
     {
         inletDir_.writeEntry("inletDirection", os);
     }
-    if (tangentialVelocity_.size())
+    if (hasTangentialVelocity())
     {
         tangentialVelocity_.writeEntry("tangentialVelocity", os);
     }
     this->writeEntry("value", os);
 #else
-    if (inletDir_.size())
+    if (hasInletDirection())
     {
         writeEntry(os, "inletDirection", inletDir_);
     }
-    if (tangentialVelocity_.size())
+    if (hasTangentialVelocity())
     {
         writeEntry(os, "tangentialVelocity", tangentialVelocity_);
     }

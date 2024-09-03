@@ -75,12 +75,14 @@ class isentropicInletVelocityFvPatchVectorField
 
        
         //- Inlet direction
+        bool hasInletDir_;
         vectorField inletDir_;
-
+    
         //- Optional tangential velocity
         //- Note: either inletDir, or tangentialVelocity can be specified, but no both!
+        bool hasTangentialVelocity_;
         vectorField tangentialVelocity_;
-
+        
 public:
 
     //- Runtime type information
@@ -194,6 +196,11 @@ public:
                 return TName_;
             }
 
+            bool hasInletDirection() const
+            {
+                return hasInletDir_;
+            }
+    
             const vectorField& inletDirection() const
             {
 		return inletDir_;
@@ -204,6 +211,11 @@ public:
                 return inletDir_;
             }
 
+            bool hasTangentialVelocity() const
+            {
+                return hasTangentialVelocity_;
+            }
+    
     	    const vectorField& tangentialVelocity() 
             {
                 return tangentialVelocity_;
