@@ -20,7 +20,12 @@ The package consists of two sub-directories:
     of turbulent compressible flows, 
   - *mySonicLiquidFoam*: transient solver for trans-sonic/supersonic, laminar
     flow of a compressible liquid. 
-  - *myRhoSimpleFOam*: steady state SIMPLE solver for compressible gas with corrections for MRF
+
+Obsolete / removed parts:
+
+  - *myRhoSimpleFoam*: steady state compressible gas with corrections for MRF, the OpenFOAM v2312 
+     already has corrected version of EEqn. Therefore *myRhoSimpleFoam* was removed.
+
 
 # Installation
 The installation is quite easy, just do
