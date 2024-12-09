@@ -29,3 +29,138 @@
 
 # Emacs backup files
 *~
+
+#########################################
+#   Metas
+#########################################
+.imageconf
+.vscode
+
+#########################################
+#   Compressed files
+#########################################
+*.zip
+*.tgz
+*.gz
+*.7z
+
+#########################################
+#   Images and videos
+#########################################
+**/*/*.png
+**/*/*.jpeg
+**/*/*.jpg
+**/*/*.tiff
+**/*/*.svg
+**/*/*.mp4
+**/*/*.avi
+**/*/*.wmv
+
+#########################################
+#   Python
+#########################################
+**/*/*pycache*
+*.venv
+*.pyc
+
+#########################################
+#   Geometry files
+#########################################
+**/*/*.stl
+**/*/*.fms
+**/*/*.obj
+**/*/*.vt*
+**/*/*.mtl
+
+#########################################
+#   Log and build files
+#########################################
+*out Create monthly report*
+*log*
+**/*/build
+**/*/old
+
+#########################################
+#   VS Code
+#########################################
+**/*/*.DS_Store
+**/*/*.Identifier
+
+#########################################
+#   OpenFOAM
+#########################################
+# Timestep directories
+**/*/0*
+!**/*/0.orig
+**/*/*e-0*
+**/*/*e-10
+**/*/[1-9]*
+**/*/backup*
+
+# Fields that must get ignored
+**/*/phi*
+**/*/meshPhi*
+
+# Decomposed domain
+**/*/processor*
+
+# logfiles
+log.*
+*log
+
+# paraview/ParaFoam
+**/*/*.foam
+**/*/*.OpenFOAM
+**/*/*.pvsm
+**/*/*VTK*
+
+# VTK
+**/VTK
+
+# mesh data that is no dictionary
+**/*/constant/polyMesh/points*
+**/*/constant/polyMesh/faces*
+**/*/constant/polyMesh/owner*
+**/*/constant/polyMesh/neighbour*
+**/*/constant/polyMesh/sets
+**/*/constant/polyMesh/*
+**/*/*polyMesh*
+**/*/*.msh
+**/*/*.nmf
+**/*/*.p3dfmt
+**/*/*.p2dfmt
+**/*/*.x.fmt
+
+# Zones and levels
+# *Level*
+# *Zone*
+
+# snappyHexMesh files that are not snappyHexMeshDict
+**/constant/polyMesh/refinementHistory*
+**/constant/polyMesh/surfaceIndex*
+**/constant/triSurface
+**/constant/extendedFeatureEdgeMesh
+**/*.obj
+
+# function object and post-processing data
+forces
+postProcessing
+
+# Needed when C++ code is built using the OpenFOAM library, since it does not
+# use a "normal" build tool (make, cmake, ..).
+lnInclude
+*.dep
+linux*
+Darwin*
+
+#########################################
+#  Exclude important folders and files
+#########################################
+#
+!**/*/constant/thermophysicalProperties
+!**/*/boundary
+!**/*/constant/turbulenceProperties
+!**/*/system
+!.gitignore
+!**/*/logging
+!**/*/FOs/forces
