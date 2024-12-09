@@ -38,11 +38,12 @@ Foam::AUSMplusUpFlux::AUSMplusUpFlux(const fvMesh&, const fluidThermo& thermo, c
     dbnsFlux(thermo)
 {
     dictionary mySubDict( dict.subOrEmptyDict("AUSMplusUpFluxCoeffs") );
-    beta_  = mySubDict.lookupOrAddDefault("beta", 1.0/8.0);
-    MaInf_ = mySubDict.lookupOrAddDefault("MaInf", 0.3);
-    Kp_    = mySubDict.lookupOrAddDefault("Kp", 0.25);
-    Ku_    = mySubDict.lookupOrAddDefault("Ku", 0.75);
-    sigma_ = mySubDict.lookupOrAddDefault("sigma", 1.0);
+    beta_    = mySubDict.lookupOrAddDefault("beta", 1.0/8.0);
+    MaInf_   = mySubDict.lookupOrAddDefault("MaInf", 0.3);
+    Kp_      = mySubDict.lookupOrAddDefault("Kp", 0.25);
+    Ku_      = mySubDict.lookupOrAddDefault("Ku", 0.75);
+    sigma_   = mySubDict.lookupOrAddDefault("sigma", 1.0);
+    deltaEF_ = mySubDict.lookupOrAddDefault("deltaEF", 1e-4);
     
     if (mySubDict.lookupOrDefault("printCoeffs", false))
         Info << mySubDict << nl;
@@ -106,8 +107,8 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     const scalar aHatRight = sqr(aStar) / max(aStar, -qRight);
     const scalar aTilde = min(aHatLeft, aHatRight);
     const scalar rhoTilde = 0.5*(rhoLeft+rhoRight);
-    
-    const scalar sqrMaDash = (sqr(qLeft)+sqr(qRight))/(2.0*sqr(aTilde));
+
+    const scalar sqrMaDash = ((sqr(qLeft)+sqr(qRight))/(2.0*sqr(aTilde))+deltaEF_)/(1+deltaEF_);
     const scalar sqrMaZero = min(1.0,max(sqrMaDash,sqr(MaInf_)));
     const scalar MaZero    = Foam::sqrt(sqrMaZero);
 
@@ -117,9 +118,9 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     
     const scalar MaRelLeft  = qLeft /aTilde;
     const scalar MaRelRight = qRight/aTilde;
-    
-    const scalar magMaRelLeft  = mag(MaRelLeft);
-    const scalar magMaRelRight = mag(MaRelRight);
+
+    const scalar magMaRelLeft  = (mag(MaRelLeft) +deltaEF_)/(1+deltaEF_);
+    const scalar magMaRelRight = (mag(MaRelRight)+deltaEF_)/(1+deltaEF_);
     
     const scalar Ma1PlusLeft   = 0.5*(MaRelLeft +magMaRelLeft );
     const scalar Ma1MinusRight = 0.5*(MaRelRight-magMaRelRight);
