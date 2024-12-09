@@ -102,6 +102,7 @@ private:
     scalar Kp_;
     scalar Ku_;
     scalar sigma_;
+    scalar deltaEF_;
 };
 
 
