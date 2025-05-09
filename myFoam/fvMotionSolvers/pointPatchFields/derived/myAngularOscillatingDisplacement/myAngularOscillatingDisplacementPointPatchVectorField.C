@@ -186,8 +186,8 @@ void myAngularOscillatingDisplacementPointPatchVectorField::write
     os.writeEntry("axis", axis_);
     os.writeEntry("origin", origin_);
     os.writeEntry("angle0", angle0_);
-    os.writeEntry("amplitude", amplitude_);
-    os.writeEntry("omega", omega_);
+    amplitude_->writeData(os);
+    omega_->writeData(os);
     p0_.writeEntry("p0", os);
     this->writeValueEntry(os);
 }
