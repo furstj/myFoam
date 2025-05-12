@@ -59,7 +59,8 @@ class myAngularOscillatingDisplacementPointPatchVectorField
 
         vector axis_;
         vector origin_;
-        scalar angle0_;
+        scalar angle0_;                            // Angle at time `time0`
+        scalar time0_;                             // Initial time (default 0)
         autoPtr<Function1<scalar>> amplitude_;
         autoPtr<Function1<scalar>> omega_;
 

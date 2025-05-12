@@ -49,6 +49,7 @@ myAngularOscillatingDisplacementPointPatchVectorField
     axis_(Zero),
     origin_(Zero),
     angle0_(0.0),
+    time0_(0.0),
     amplitude_(),
     omega_(),
     p0_(p.localPoints())
@@ -66,7 +67,8 @@ myAngularOscillatingDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF, dict),
     axis_(dict.lookup("axis")),
     origin_(dict.lookup("origin")),
-    angle0_(dict.get<scalar>("angle0")),
+    angle0_(dict.lookupOrDefault<scalar>("angle0", 0.0)),
+    time0_(dict.lookupOrDefault<scalar>("time0", 0.0)),
     amplitude_(Function1<scalar>::New("amplitude", dict, &db())),
     omega_(Function1<scalar>::New("omega", dict, &db()))
 {
@@ -99,6 +101,7 @@ myAngularOscillatingDisplacementPointPatchVectorField
     axis_(ptf.axis_),
     origin_(ptf.origin_),
     angle0_(ptf.angle0_),
+    time0_(ptf.time0_),
     amplitude_(ptf.amplitude_.clone()),
     omega_(ptf.omega_.clone()),
     p0_(ptf.p0_, mapper)
@@ -116,6 +119,7 @@ myAngularOscillatingDisplacementPointPatchVectorField
     axis_(ptf.axis_),
     origin_(ptf.origin_),
     angle0_(ptf.angle0_),
+    time0_(ptf.time0_),
     amplitude_(ptf.amplitude_.clone()),
     omega_(ptf.omega_.clone()),
     p0_(ptf.p0_)
@@ -161,8 +165,7 @@ void myAngularOscillatingDisplacementPointPatchVectorField::updateCoeffs()
     const Time& t = mesh.time();
 
     scalar myAmplitude = amplitude_->value(t.value());
-    scalar myOmega = omega_->value(t.value());
-    scalar angle = angle0_ + myAmplitude*sin(myOmega*t.value());
+    scalar angle = angle0_ + myAmplitude*omega_->integrate(time0_, t.value());
     vector axisHat = axis_/mag(axis_);
     vectorField p0Rel(p0_ - origin_);
 
