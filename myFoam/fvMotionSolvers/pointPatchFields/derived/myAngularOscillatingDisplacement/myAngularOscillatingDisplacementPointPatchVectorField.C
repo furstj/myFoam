@@ -165,7 +165,7 @@ void myAngularOscillatingDisplacementPointPatchVectorField::updateCoeffs()
     const Time& t = mesh.time();
 
     scalar myAmplitude = amplitude_->value(t.value());
-    scalar angle = angle0_ + myAmplitude*omega_->integrate(time0_, t.value());
+    scalar angle = angle0_ + myAmplitude*sin(omega_->integrate(time0_, t.value()));
     vector axisHat = axis_/mag(axis_);
     vectorField p0Rel(p0_ - origin_);
 
