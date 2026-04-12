@@ -130,14 +130,12 @@ void Foam::inletOutletInternalFvPatchField<Type>::updateCoeffs()
     this->valueFraction() = 1.0 - pos(phip);
     */
 
-    const vectorField& normal = this->patch().nf();
-    
     const fvPatchField<vector>& Up =
       this->patch().template lookupPatchField<volVectorField, vector>("U");
 
     const vectorField& Uint = Up.internalField();
 
-    this->valueFraction() = 1.0 - pos( normal & Uint );
+    this->valueFraction() = 1.0 - pos( this->patch().nf() & Uint );
 
     mixedFvPatchField<Type>::updateCoeffs();
 }

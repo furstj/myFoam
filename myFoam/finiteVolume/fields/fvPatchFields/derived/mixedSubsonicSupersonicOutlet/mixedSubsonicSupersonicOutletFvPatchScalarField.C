@@ -174,7 +174,7 @@ void mixedSubsonicSupersonicOutletFvPatchScalarField::updateCoeffs()
         const volScalarField Cp = thermo.Cp();
 	const volScalarField Cv = thermo.Cv();
 	
-	const vectorField& normalVector = patch().nf();
+	const vectorField normalVector(patch().nf());
 
         const fvPatchField<scalar>& Cpp =
             patch().patchField<volScalarField, scalar>(Cp);
