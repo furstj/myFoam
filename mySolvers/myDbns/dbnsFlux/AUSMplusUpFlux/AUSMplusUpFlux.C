@@ -66,7 +66,8 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
-    const scalar& meshPhi
+    const scalar& meshPhi,
+    const scalar& h
 ) const
 {
     // Step 1: decode left and right:
@@ -118,36 +119,47 @@ void Foam::AUSMplusUpFlux::evaluateFlux
     const scalar magMaRelLeft  = (mag(MaRelLeft) +deltaEF_)/(1+deltaEF_);
     const scalar magMaRelRight = (mag(MaRelRight)+deltaEF_)/(1+deltaEF_);
     
+    // Eq. 18
     const scalar Ma1PlusLeft   = 0.5*(MaRelLeft +magMaRelLeft );
     const scalar Ma1MinusRight = 0.5*(MaRelRight-magMaRelRight);
     
+    // Eq. 19
     const scalar Ma2PlusLeft   =  0.25*sqr(MaRelLeft +1.0);
     const scalar Ma2PlusRight  =  0.25*sqr(MaRelRight+1.0);
     const scalar Ma2MinusLeft  = -0.25*sqr(MaRelLeft -1.0);
     const scalar Ma2MinusRight = -0.25*sqr(MaRelRight-1.0);
     
+    // Eq. 20
     const scalar Ma4BetaPlusLeft   = ((magMaRelLeft  >= 1.0) ? Ma1PlusLeft   : (Ma2PlusLeft  *(1.0-16.0*beta_*Ma2MinusLeft)));
     const scalar Ma4BetaMinusRight = ((magMaRelRight >= 1.0) ? Ma1MinusRight : (Ma2MinusRight*(1.0+16.0*beta_*Ma2PlusRight)));
         
+    // Eq. 21 or 73
     const scalar Mp = -Kp_/fa*max(1.0-sigma_*sqrMaDash,0.0)*(pRight-pLeft)/(rhoTilde*sqr(aTilde));
 
+    // Eq. 24
     const scalar P5alphaPlusLeft   = ((magMaRelLeft  >= 1.0) ?
     (Ma1PlusLeft/MaRelLeft)    : (Ma2PlusLeft  *(( 2.0-MaRelLeft) -16.0*alpha*MaRelLeft *Ma2MinusLeft )));
     const scalar P5alphaMinusRight = ((magMaRelRight >= 1.0) ?
     (Ma1MinusRight/MaRelRight) : (Ma2MinusRight*((-2.0-MaRelRight)+16.0*alpha*MaRelRight*Ma2PlusRight)));
-    
+
+    // Eq. 26
     const scalar pU = -Ku_*P5alphaPlusLeft*P5alphaMinusRight*(rhoLeft+rhoRight)*(fa*aTilde)*(qRight-qLeft);
     
+    // Eq. 46
     const scalar MaRelTilde = Ma4BetaPlusLeft + Ma4BetaMinusRight + Mp;
+
+    // Eq. 25
     const scalar pTilde = pLeft*P5alphaPlusLeft + pRight*P5alphaMinusRight + pU;
     
+    // Eq. 15, "working variables"
     const scalar URelTilde = MaRelTilde*aTilde;
     const scalar magURelTilde = mag(MaRelTilde)*aTilde;
+
     // There is a typo in Luo et. al, J. Comp. Physics 194 (2004), Chap 4.2 Eq. 4.8
     // refer to the origial Paper from Liou, J. Comp. Physics 129 (1996), Chap4, Eq. 42
     rhoFlux  = (0.5*(URelTilde*(rhoLeft +rhoRight) -magURelTilde*(rhoRight -rhoLeft)))*magSf;
     rhoUFlux = (0.5*(URelTilde*(rhoULeft+rhoURight)-magURelTilde*(rhoURight-rhoULeft))+pTilde*normalVector)*magSf;
-    rhoEFlux = (0.5*(URelTilde*(rhoHLeft+rhoHRight)-magURelTilde*(rhoHRight-rhoHLeft)) + pTilde*qMesh)*magSf;
+    rhoEFlux = (0.5*(URelTilde*(rhoHLeft+rhoHRight)-magURelTilde*(rhoHRight-rhoHLeft))+pTilde*qMesh)*magSf;
 
 }
 

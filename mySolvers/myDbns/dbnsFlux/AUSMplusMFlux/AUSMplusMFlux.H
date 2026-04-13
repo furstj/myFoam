@@ -21,24 +21,27 @@ License
     You should have received a copy of the GNU General Public License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    RoeFlux
+Application
+    ausmPlusMFlux
 
 Description
-    Implementation of inviscid numerical fluxes based on Roe & Pike FDS scheme
-    with Harten's entropy fix. This is a first order scheme
+    AUSM+M flux scheme. From:
 
-Author
-    Aleksandar Jemcov
-    Rewrite by Hrvoje Jasak
+    "An improved AUSM-family scheme with robustness and accuracy for all Mach number flows",
+    Chen, Shu-sheng and Cai, Fang-jie and Xue, Hai-chao and  Wang, Ning and Yan, Chao,
+    Applied Mathematical Modelling (77), doi.org/10.1016/j.apm.2019.09.005, 2020.
+
+Author(s)
+    Adam Tater         - Major development.
+    Maximilian Maigler - Minor improvements and testing.
 
 SourceFiles
-    roeFlux.H
+    AUSMplusMFlux.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef roeFlux_H
-#define roeFlux_H
+#ifndef AUSMplusMFlux_H
+#define AUSMplusMFlux_H
 
 #include "dbnsFlux.H" 
 
@@ -48,28 +51,36 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class roeFlux Declaration
+                           Class AUSMplusMFlux Declaration
 \*---------------------------------------------------------------------------*/
 
-class roeFlux:
-public dbnsFlux
+class AUSMplusMFlux: public dbnsFlux
 {
+private:
+    AUSMplusMFlux();
+    AUSMplusMFlux(const AUSMplusMFlux&);
+
+    // Boolean flag for pressure sensing
+    bool requiresPressureSensing_;
+  
+    scalar sqrMachInf_;
+    scalar alpha0_;
+
 public:
-    TypeName("roeFlux");
+    TypeName("AUSMplusMFlux");
 
     // Constructors
 
-    //- Construct null
-    roeFlux(const fvMesh&, const dictionary&)
-        {}
-    
-    
+    //- Constructor 
+    AUSMplusMFlux(const fvMesh&, const dictionary&);
+
+
     // Destructor - default
-    virtual ~roeFlux() {};
+    virtual ~AUSMplusMFlux() {};
 
     // Member Functions
-
-        //- Update fluxes based on current left and right states
+    
+    //- Update fluxes based on current left and right states
     virtual void evaluateFlux
     (
         scalar& rhoFlux,
@@ -90,7 +101,9 @@ public:
         const scalar& meshPhi,
         const scalar& h
     ) const;
+
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -82,10 +82,11 @@ int main(int argc, char *argv[])
         #include "readTimeControls.H"
         #include "readFieldBounds.H"
 
-        surfaceScalarField amaxSf("amaxSf", 
-        mag(fvc::interpolate(U) & mesh.Sf()) +
-        mesh.magSf() * fvc::interpolate(sqrt(thermo.Cp()/thermo.Cv()/thermo.psi())));
-        
+        surfaceScalarField amaxSf(
+            "amaxSf", 
+              mag(fvc::interpolate(U) & mesh.Sf())
+            + mesh.magSf() * fvc::interpolate(sqrt(thermo.Cp()/thermo.Cv()/thermo.psi()))
+        );
 
         #include "compressibleCFLNo.H"
         #include "setDeltaT.H"

@@ -51,7 +51,8 @@ void Foam::rusanovFlux::evaluateFlux
     const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
-    const scalar& meshPhi
+    const scalar& meshPhi,
+    const scalar& h
 ) const
 {
   if (mag(meshPhi)>0.0) 

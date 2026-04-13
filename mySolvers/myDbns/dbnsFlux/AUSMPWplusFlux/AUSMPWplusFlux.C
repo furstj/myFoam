@@ -39,6 +39,7 @@ Foam::AUSMPWplusFlux::AUSMPWplusFlux(const fvMesh&, const dictionary& dict)
     dictionary mySubDict( dict.subOrEmptyDict("AUSMPWplusFluxCoeffs") );
     alpha_ = mySubDict.lookupOrAddDefault("alpha", 3.0/16.0);
     beta_  = mySubDict.lookupOrAddDefault("beta", 1.0/8.0);
+    requiresPressureSensing_ = false;
     
     if (mySubDict.lookupOrDefault("printCoeffs", false))
         Info << mySubDict << nl;
@@ -62,7 +63,8 @@ void Foam::AUSMPWplusFlux::evaluateFlux
     const scalar& CvRight,
     const vector& Sf,
     const scalar& magSf,
-    const scalar& meshPhi
+    const scalar& meshPhi,
+    const scalar& h
 ) const
 {
     // Step 1: decode left and right:
